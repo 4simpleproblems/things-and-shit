@@ -6,18 +6,18 @@
   
   <title>things and s***.</title>
   <meta name="title" content="things and s***.">
-  <meta name="description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection.">
+  <meta name="description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection. Physical objects meet abstract memories in a curated grid.">
 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://things-and-shit.org/">
   <meta property="og:title" content="things and s***.">
-  <meta property="og:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection.">
+  <meta property="og:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection. Physical objects meet abstract memories in a curated grid.">
   <meta property="og:image" content="https://things-and-shit.org/favicon.ico">
 
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://things-and-shit.org/">
   <meta property="twitter:title" content="things and s***.">
-  <meta property="twitter:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection.">
+  <meta property="twitter:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection. Physical objects meet abstract memories in a curated grid.">
   <meta property="twitter:image" content="https://things-and-shit.org/favicon.ico">
 
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -43,7 +43,7 @@
     }
 
     /* --- HERO & SORTING --- */
-    .hero { padding: 80px 24px 20px; text-align: center; } /* Reduced from 120px */
+    .hero { padding: 80px 24px 20px; text-align: center; } 
     .hero h1 { 
       font-family: 'Alfa Slab One', serif; 
       font-size: clamp(40px, 9vw, 85px); 
@@ -125,16 +125,20 @@
     .footer-bar a:hover { color: #1a1a1a; }
 
     /* --- MODAL --- */
+    body.animating .tag, body.animating .card { transition: none !important; pointer-events: none !important; }
     #expansionOverlay { position: fixed; z-index: 10000; display: none; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
     #expansionOverlay.active { top: 40px !important; left: 40px !important; width: calc(100vw - 80px) !important; height: calc(100vh - 80px) !important; }
     #modalDetailsView { z-index: 2; opacity: 0; background: #fff; border-radius: 40px; border: 5px solid #1a1a1a; overflow: hidden; transition: opacity 0.3s ease; }
     #expansionOverlay.active #modalDetailsView { opacity: 1; pointer-events: auto; box-shadow: 25px 25px 0px #1a1a1a; }
     #modalMainContent { display: flex; flex-direction: row; height: 100%; width: 100%; }
-    .visual-expanded-container { position: relative; background: #ffffff; flex: 0 0 50%; border-right: 5px solid #1a1a1a; display: flex; align-items: center; justify-content: center; }
-    .slide { position: absolute; inset: 30px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
-    .slide.active { opacity: 1; z-index: 2; }
-    .slide img, .texture-slide-inner { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 30px; border: 5px solid #1a1a1a; background: #f9f9f9; box-shadow: 10px 10px 0px #f0f0f0; }
+    .visual-expanded-container { position: relative; background: #ffffff; flex: 0 0 50%; border-right: 5px solid #1a1a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     
+    /* SLIDESHOW STRUCTURE */
+    #slides-wrapper { position: absolute; inset: 0; z-index: 1; }
+    .slide { position: absolute; inset: 30px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; visibility: hidden; }
+    .slide.active { opacity: 1; visibility: visible; }
+    .slide img, .texture-slide-inner { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 30px; border: 5px solid #1a1a1a; background: #f9f9f9; box-shadow: 10px 10px 0px #f0f0f0; }
+
     .btn-hitbox {
       position: absolute; width: 60px; height: 60px;
       display: flex; align-items: center; justify-content: center;
@@ -156,7 +160,7 @@
     #dimmer.visible { opacity: 1; pointer-events: auto; }
 
     @media (max-width: 800px) {
-      .hero { padding: 35px 16px 20px; } /* Shrunk mobile top gap */
+      .hero { padding: 40px 16px 20px; }
       .item-grid { grid-template-columns: 1fr; }
       #expansionOverlay.active { top: 12px !important; left: 12px !important; width: calc(100vw - 24px) !important; height: calc(100vh - 24px) !important; }
       #modalMainContent { flex-direction: column; }
@@ -164,6 +168,7 @@
       .footer-bar { position: static; flex-direction: column; text-align: center; margin-top: 40px; padding-bottom: 20px; }
       .slide { inset: 15px; }
       .tag { bottom: -10px; right: -5px; padding: 6px 14px; font-size: 12px; }
+      .slide-btn, .close-x { width: 42px; height: 42px; font-size: 18px; }
     }
   </style>
 </head>
@@ -205,13 +210,13 @@
     
     <div id="modalMainContent">
       <div class="visual-expanded-container">
-        <div id="slideshow" style="width:100%; height:100%; position:relative;">
-          <div class="btn-hitbox prev-hitbox" onclick="changeSlide(-1)">
-            <div class="slide-btn"><i class="fa-solid fa-chevron-left"></i></div>
-          </div>
-          <div class="btn-hitbox next-hitbox" onclick="changeSlide(1)">
-            <div class="slide-btn"><i class="fa-solid fa-chevron-right"></i></div>
-          </div>
+        <div id="slides-wrapper"></div>
+        
+        <div class="btn-hitbox prev-hitbox" onclick="changeSlide(-1)">
+          <div class="slide-btn"><i class="fa-solid fa-chevron-left"></i></div>
+        </div>
+        <div class="btn-hitbox next-hitbox" onclick="changeSlide(1)">
+          <div class="slide-btn"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
       </div>
       <div class="modal-expanded-info">
@@ -238,7 +243,7 @@
       images: ["texture"]
     },
     {
-      id: 3, category: "thing", title: "object placeholder", date: "none",
+      id: 3, category: "thing", title: "placeholder", date: "none",
       tag: "Whoa.", shortDesc: "testing the limits of the layout.",
       fullDesc: "A structural anchor for the collection until a new physical object is added. This serves to demonstrate the grid and tag systems.",
       images: ["https://placehold.co/600x400/fff/1a1a1a?text=Placeholder"]
@@ -287,16 +292,18 @@
   function openExpanded(card, item) {
     originCard = card;
     const overlay = document.getElementById('expansionOverlay');
-    const ss = document.getElementById('slideshow');
+    const wrapper = document.getElementById('slides-wrapper');
     const rect = card.querySelector('.slot-design').getBoundingClientRect();
 
     document.getElementById('eTitle').textContent = item.title;
     document.getElementById('eDate').textContent = item.date;
     document.getElementById('eText').textContent = item.fullDesc;
 
-    const navButtons = ss.querySelectorAll('.btn-hitbox:not(.close-hitbox)');
+    // Navigation logic
+    const navButtons = document.querySelectorAll('.prev-hitbox, .next-hitbox');
     navButtons.forEach(btn => btn.style.display = item.images.length > 1 ? 'flex' : 'none');
 
+    // Box Hand-off
     const replica = document.getElementById('modalSlotReplica');
     replica.innerHTML = '';
     const cloned = card.querySelector('.slot-design').cloneNode(true);
@@ -304,15 +311,17 @@
     cloned.style.width = '100%'; cloned.style.height = '100%';
     replica.appendChild(cloned);
 
+    // Tag Hand-off
     overlay.appendChild(card.querySelector('.tag'));
 
+    // Clear and reset slides
+    wrapper.innerHTML = '';
     currentSlideIndex = 0;
-    ss.querySelectorAll('.slide').forEach(s => s.remove());
     item.images.forEach((src, i) => {
       const s = document.createElement('div');
       s.className = `slide ${i === 0 ? 'active' : ''}`;
       s.innerHTML = src === 'texture' ? '<div class="texture-slide-inner" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;"><div style="font-family:\'Alfa Slab One\'; color:#bbb; font-size:60px;">s***</div></div>' : `<img src="${src}">`;
-      ss.insertBefore(s, ss.firstChild);
+      wrapper.appendChild(s);
     });
 
     overlay.style.transition = 'none';
@@ -359,5 +368,17 @@
 
   renderGrid();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "things and s***.",
+  "url": "https://things-and-shit.org/",
+  "description": "An archive of random objects and adrenaline crashes.",
+  "author": { "@type": "Organization", "name": "4SP" }
+}
+</script>
+
 </body>
 </html>
