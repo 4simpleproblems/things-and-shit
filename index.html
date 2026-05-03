@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>things and s***.</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { 
+      font-family: 'Nunito', sans-serif; 
+      background: #ffffff; 
+      color: #1a1a1a; 
+      padding-bottom: 100px;
+      overflow-x: hidden;
+    }
+
+    /* --- HERO --- */
+    .hero {
+      padding: 120px 24px 80px;
+      text-align: center;
+    }
+
+    .hero h1 { 
+      font-family: 'Alfa Slab One', serif; 
+      font-size: clamp(40px, 9vw, 85px); 
+      color: #1a1a1a; 
+      line-height: 1.2;
+      letter-spacing: -3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .title-badge {
+      display: inline-block;
+      padding: 5px 25px;
+      background: #ffffff;
+      border: 5px solid #1a1a1a;
+      border-radius: 20px;
+      transform: rotate(-4deg);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: help;
+      box-shadow: 6px 6px 0px #f0f0f0;
+    }
+
+    .title-badge:hover {
+      transform: rotate(0deg) scale(1.1);
+      box-shadow: 0px 10px 0px #f0f0f0;
+    }
+
+    .hero p {
+      font-weight: 800;
+      color: #ccc;
+      margin-top: 30px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      font-size: 12px;
+    }
+
+    /* --- GRID --- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 40px;
+    }
+
+    /* --- SLOT DESIGN --- */
+    .slot-design {
+      background: #ffffff;
+      border: 5px solid #1a1a1a;
+      border-radius: 40px;
+      overflow: hidden;
+    }
+
+    .slot-visual {
+      aspect-ratio: 1/1;
+      background: #f9f9f9;
+      border-bottom: 5px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-content { padding: 30px; }
+    .slot-title { font-family: 'Alfa Slab One', serif; font-size: 26px; line-height: 1.1; margin-bottom: 8px; text-transform: none; }
+    .slot-desc-short { font-size: 16px; color: #666; font-weight: 600; }
+
+    .card {
+      box-shadow: 10px 10px 0px #f0f0f0;
+      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+
+    .card:hover { transform: translateY(-20px); box-shadow: 0px 30px 0px #e8e8e8; }
+    .card .slot-visual img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Shit Block specific style */
+    .card.shit-block .slot-visual {
+      outline: 5px solid #1a1a1a; outline-offset: -5px; 
+      background-image: repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px);
+      background-size: 20px 20px;
+    }
+    .shit-icon { font-family: 'Alfa Slab One', serif; color: #ddd; font-size: 80px; user-select: none; }
+
+    /* --- EXPANSION SYSTEM --- */
+    #expansionOverlay {
+      position: fixed;
+      z-index: 10000; /* Must stay above EVERYTHING */
+      display: none;
+      pointer-events: auto;
+      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    #expansionOverlay.active {
+      top: 40px !important; left: 40px !important;
+      width: calc(100vw - 80px) !important; height: calc(100vh - 80px) !important;
+      box-shadow: 25px 25px 0px #1a1a1a;
+    }
+
+    /* CROSS-FADE VIEWS */
+    #modalDetailsView, #modalSlotReplica {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      transition: opacity 0.3s ease;
+    }
+
+    #modalDetailsView { opacity: 0; pointer-events: none; }
+    .active #modalDetailsView { opacity: 1; pointer-events: auto; transition-delay: 0.1s; }
+
+    #modalSlotReplica { opacity: 1; pointer-events: none; } 
+    .active #modalSlotReplica { opacity: 0; } 
+
+    .slideshow-container {
+      position: relative; background: #000; height: 55%;
+      border-bottom: 6px solid #1a1a1a; display: flex; overflow: hidden;
+    }
+    #slideshow, #modalTextureVisual { width: 100%; height: 100%; display: none; }
+    .show-slideshow #slideshow { display: block; }
+    .show-texture #modalTextureVisual { display: flex; }
+
+    .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s ease; display: flex; align-items: center; justify-content: center; }
+    .slide.active { opacity: 1; }
+    .slide img { width: 100%; height: 100%; object-fit: contain; }
+
+    .slide-btn { position: absolute; top: 50%; transform: translateY(-50%); background: #fff; border: 4px solid #1a1a1a; padding: 12px; cursor: pointer; font-family: 'Alfa Slab One', serif; z-index: 10; border-radius: 12px; }
+    .prev { left: 20px; } .next { right: 20px; }
+
+    .textured-detail { 
+      background-color: #f9f9f9;
+      background-image: repeating-linear-gradient(45deg, #ddd, #ddd 1px, transparent 1px, transparent 20px); 
+      align-items: center; justify-content: center; width: 100%; height: 100%; 
+    }
+
+    .close-x {
+      position: absolute; top: 20px; right: 20px;
+      background: #1a1a1a; color: #fff; border: none;
+      width: 45px; height: 45px; border-radius: 50%;
+      font-family: 'Alfa Slab One', serif; cursor: pointer; z-index: 100;
+    }
+
+    .modal-expanded-info { padding: 40px; }
+    .desc-full { font-size: 18px; color: #1a1a1a; font-weight: 500; line-height: 1.6; }
+
+    /* DIMMER BLUR FADE */
+    #dimmer {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px); opacity: 0; pointer-events: none; z-index: 9998;
+      transition: opacity 0.5s ease;
+    }
+    #dimmer.visible { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+<body>
+
+<div id="dimmer" onclick="closeExpanded()"></div>
+
+<div class="hero">
+  <h1>things and <span class="title-badge">s***.</span></h1>
+  <p>a collection of random objects and the stories they left behind</p>
+</div>
+
+<div class="container">
+  <div class="item-grid">
+    
+    <div class="card slot-design" onclick="openExpanded(this, ['images/IMG_7529.jpeg', 'images/IMG_7531.jpeg', 'images/IMG_7532.jpeg'], 'the Nelson rock', 'may 2026', 'Took a spill off a massive ledge and shredded both my arms. This rock is the only reason I don\'t regret it. A permanent souvenir of a scar-worthy day.')">
+      <div class="slot-visual">
+        <img src="images/IMG_7529.jpeg" alt="Rock">
+      </div>
+      <div class="slot-content">
+        <div class="slot-title">the nelson rock</div>
+        <div class="slot-desc-short">a reminder of the day i took a dive off a bigger rock.</div>
+      </div>
+    </div>
+
+    <div class="card shit-block slot-design" onclick="openExpanded(this, ['texture'], 'abstract shit', 'TBD', 'Memories, context, and the parts of the story that aren\'t easily photographed.')">
+      <div class="slot-visual">
+        <div class="shit-icon">s***</div>
+      </div>
+      <div class="slot-content">
+        <div class="slot-title">abstract shit</div>
+        <div class="slot-desc-short">general context and stories tbd.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="expansionOverlay" class="slot-design">
+  
+  <div id="modalSlotReplica">
+    <div class="slot-visual" id="replicaVisual"></div>
+    <div class="slot-content">
+      <div class="slot-title" id="replicaTitle"></div>
+      <div class="slot-desc-short" id="replicaDescShort"></div>
+    </div>
+  </div>
+
+  <div id="modalDetailsView">
+    <button class="close-x" onclick="closeExpanded()">✕</button>
+    <div class="slideshow-container" id="visualContainer">
+      <div id="slideshow" class="slideshow">
+        <button class="slide-btn prev" onclick="moveSlide(-1)">❮</button>
+        <button class="slide-btn next" onclick="moveSlide(1)">❯</button>
+      </div>
+      <div id="modalTextureVisual" class="textured-detail">
+         <div class="shit-icon" style="color: #bbb;">s***</div>
+      </div>
+    </div>
+    <div class="modal-expanded-info">
+      <div class="slot-title" id="eTitle" style="font-size: 38px;"></div>
+      <div id="eDate" style="color: #aaa; font-weight: 900; text-transform: uppercase; font-size: 11px; margin-bottom: 15px; letter-spacing: 2px;"></div>
+      <div class="desc-full" id="eText"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentSlide = 0;
+  let originCard = null;
+
+  function openExpanded(card, images, title, date, text) {
+    originCard = card;
+    const overlay = document.getElementById('expansionOverlay');
+    const dimmer = document.getElementById('dimmer');
+    const visual = document.getElementById('visualContainer');
+    const rect = card.getBoundingClientRect();
+
+    // 1. Instantly hide the actual card to prevent "ghosting"
+    originCard.style.visibility = 'hidden'; 
+
+    visual.classList.remove('show-slideshow', 'show-texture');
+    document.getElementById('eTitle').textContent = title;
+    document.getElementById('eDate').textContent = date;
+    document.getElementById('eText').textContent = text;
+    
+    const cardShortDesc = card.querySelector('.slot-desc-short').textContent;
+    const cardTitleText = card.querySelector('.slot-title').textContent;
+    document.getElementById('replicaTitle').textContent = cardTitleText; 
+    document.getElementById('replicaDescShort').textContent = cardShortDesc;
+
+    const replicaVisual = document.getElementById('replicaVisual');
+    replicaVisual.innerHTML = ''; 
+
+    if (images[0] === 'texture') {
+      visual.classList.add('show-texture');
+      replicaVisual.innerHTML = '<div class="shit-icon" style="font-size: 80px;">s***</div>';
+      replicaVisual.style.backgroundImage = 'repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px)';
+      replicaVisual.style.backgroundSize = '20px 20px';
+      replicaVisual.style.outline = '5px solid #1a1a1a';
+      replicaVisual.style.outlineOffset = '-5px';
+    } else {
+      visual.classList.add('show-slideshow');
+      const ssContent = document.getElementById('slideshow');
+      ssContent.querySelectorAll('.slide').forEach(s => s.remove());
+      images.forEach((imgSrc, i) => {
+        const s = document.createElement('div');
+        s.className = `slide ${i === 0 ? 'active' : ''}`;
+        s.innerHTML = `<img src="${imgSrc}" onerror="this.src='https://via.placeholder.com/600?text=Object'">`;
+        ssContent.appendChild(s);
+      });
+      replicaVisual.innerHTML = `<img src="${images[0]}" alt="replica" style="width:100%; height:100%; object-fit:cover;">`;
+      replicaVisual.style.backgroundImage = 'none'; replicaVisual.style.outline = 'none';
+      currentSlide = 0;
+    }
+
+    // TELEPORT
+    overlay.style.transition = 'none';
+    overlay.style.display = 'block';
+    overlay.style.top = rect.top + 'px';
+    overlay.style.left = rect.left + 'px';
+    overlay.style.width = rect.width + 'px';
+    overlay.style.height = rect.height + 'px';
+
+    requestAnimationFrame(() => {
+      dimmer.classList.add('visible');
+      overlay.style.transition = 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
+      overlay.classList.add('active');
+    });
+
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeExpanded() {
+    const overlay = document.getElementById('expansionOverlay');
+    const dimmer = document.getElementById('dimmer');
+    const rect = originCard.getBoundingClientRect();
+
+    dimmer.classList.remove('visible');
+    overlay.classList.remove('active'); 
+
+    overlay.style.top = rect.top + 'px';
+    overlay.style.left = rect.left + 'px';
+    overlay.style.width = rect.width + 'px';
+    overlay.style.height = rect.height + 'px';
+
+    // Wait until the modal has fully shrunk before bringing the real slot back
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      originCard.style.visibility = 'visible'; // Only visible once modal is gone
+      document.body.style.overflow = 'auto';
+    }, 500);
+  }
+
+  function moveSlide(n) {
+    const slides = document.querySelectorAll('.slide');
+    if (slides.length < 2) return;
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + n + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }
+</script>
+
+</body>
+</html>
