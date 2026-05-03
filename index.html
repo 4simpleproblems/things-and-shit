@@ -301,16 +301,16 @@
       ]
     },
     {
-      id: 2, category: "s***", title: "the s***.", date: "ongoing",
+      id: 2, category: "s***", title: "s*** placeholder", date: "ongoing",
       tag: "F*** yeah!", shortDesc: "for the memories that don't have a shape.",
-      fullDesc: "This block holds the parts of the collection that don't have a physical representation. These are placeholders for the stories, contexts, and abstract nonsense that makes up the rest of the archive.",
+      fullDesc: "A placeholder for the entries that exist in thought but haven't taken physical form. This slot represents the abstract side of the archive, housing stories and contexts that lack a tangible object.",
       images: ["texture"]
     },
     {
-        id: 3, category: "thing", title: "melted pick", date: "july 2025",
-        tag: "Whoa.", shortDesc: "4 hours on a dashboard in July.",
-        fullDesc: "Left this pick on the dash during a heatwave. It warped into a perfect 'S' curve. Completely unplayable but it's the best looking piece of plastic I own now.",
-        images: ["https://placehold.co/600x400/fff/1a1a1a?text=Melted+Pick+01"]
+        id: 3, category: "thing", title: "placeholder", date: "none",
+        tag: "Whoa.", shortDesc: "testing the limits of the layout.",
+        fullDesc: "A generic entry used to demonstrate the tag system and grid structure. This serves as a structural anchor for the collection until a new physical object is added.",
+        images: ["https://placehold.co/600x400/fff/1a1a1a?text=Placeholder"]
     }
   ];
 
@@ -465,7 +465,7 @@
       const realTag = overlay.querySelector('.tag');
       if (realTag) {
         originCard.appendChild(realTag);
-      }
+      } 
 
       body.classList.remove('animating');
       document.body.style.overflow = 'auto';
