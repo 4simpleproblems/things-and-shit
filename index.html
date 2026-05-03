@@ -6,18 +6,18 @@
   
   <title>things and s***.</title>
   <meta name="title" content="things and s***.">
-  <meta name="description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned.">
+  <meta name="description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection.">
 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://things-and-shit.org/">
   <meta property="og:title" content="things and s***.">
-  <meta property="og:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned.">
+  <meta property="og:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection.">
   <meta property="og:image" content="https://things-and-shit.org/favicon.ico">
 
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://things-and-shit.org/">
   <meta property="twitter:title" content="things and s***.">
-  <meta property="twitter:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned.">
+  <meta property="twitter:description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned through the lens of a brutalist collection.">
   <meta property="twitter:image" content="https://things-and-shit.org/favicon.ico">
 
   <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -43,7 +43,7 @@
     }
 
     /* --- HERO & SORTING --- */
-    .hero { padding: 120px 24px 20px; text-align: center; }
+    .hero { padding: 80px 24px 20px; text-align: center; } /* Reduced from 120px */
     .hero h1 { 
       font-family: 'Alfa Slab One', serif; 
       font-size: clamp(40px, 9vw, 85px); 
@@ -53,43 +53,38 @@
       display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;
     }
 
+    .title-badge-hitbox { display: inline-block; padding: 10px; cursor: help; }
     .title-badge {
       display: inline-block; padding: 5px 25px; background: #ffffff; border: 5px solid #1a1a1a; border-radius: 20px;
       transform: rotate(-4deg); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      cursor: help; box-shadow: 6px 6px 0px #f0f0f0;
+      box-shadow: 6px 6px 0px #f0f0f0;
     }
-    .title-badge:hover { transform: rotate(0deg) scale(1.1); box-shadow: 12px 12px 0px #f0f0f0; }
+    .title-badge-hitbox:hover .title-badge { transform: rotate(0deg) scale(1.1); box-shadow: 12px 12px 0px #f0f0f0; }
 
     .sort-wrapper { display: flex; justify-content: center; gap: 15px; margin: 40px 0 60px; flex-wrap: wrap; }
+    .sort-tag-hitbox { padding: 5px; cursor: pointer; }
     .sort-tag {
       padding: 8px 20px; border: 3px solid #1a1a1a; border-radius: 12px;
-      font-family: 'Alfa Slab One', serif; font-size: 12px; cursor: pointer;
+      font-family: 'Alfa Slab One', serif; font-size: 12px;
       transition: all 0.3s ease; transform: rotate(-2deg); background: #fff;
     }
-    .sort-tag:hover { transform: rotate(0deg) scale(1.1); box-shadow: 4px 4px 0px #1a1a1a; }
+    .sort-tag-hitbox:hover .sort-tag { transform: rotate(0deg) scale(1.1); box-shadow: 4px 4px 0px #1a1a1a; }
     .sort-tag.active { background: #1a1a1a; color: #fff; transform: rotate(0deg); }
 
     /* --- GRID --- */
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; flex: 1; width: 100%; }
     .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 60px 40px; }
 
-    /* --- CARD --- */
-    .card {
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    .card:hover { transform: translateY(-20px); }
-
+    .card { position: relative; cursor: pointer; }
     .slot-design {
       background: #ffffff;
       border: 5px solid #1a1a1a;
       border-radius: 40px;
       overflow: hidden; 
       box-shadow: 10px 10px 0px #f0f0f0;
-      transition: box-shadow 0.4s ease;
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     }
-    .card:hover .slot-design { box-shadow: 25px 25px 0px #e8e8e8; }
+    .card:hover .slot-design { transform: translateY(-20px); box-shadow: 25px 25px 0px #e8e8e8; }
 
     .slot-visual {
       aspect-ratio: 1/1; background: #f9f9f9; border-bottom: 5px solid #1a1a1a;
@@ -97,7 +92,7 @@
     }
     .slot-visual img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
     .slot-content { padding: 30px; }
-    .slot-title { font-family: 'Alfa Slab One', serif; font-size: 24px; line-height: 1.1; margin-bottom: 8px; text-transform: none; }
+    .slot-title { font-family: 'Alfa Slab One', serif; font-size: 24px; line-height: 1.1; margin-bottom: 8px; }
     .slot-desc-short { font-size: 14px; color: #666; font-weight: 600; line-height: 1.4; }
 
     /* --- TAGS --- */
@@ -112,130 +107,63 @@
       font-family: 'Alfa Slab One', serif;
       font-size: 14px;
       text-transform: lowercase;
-      transform: rotate(4deg);
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
       white-space: nowrap;
+      transform: rotate(4deg);
     }
-    .card:hover .tag { transform: rotate(0deg) scale(1.2); bottom: -20px; right: -15px; }
+    .card:hover .tag { transform: rotate(0deg) scale(1.2) translateY(-20px); }
 
     .tag-frustration { background: #FF0054; color: #ffffff; box-shadow: 4px 4px 0px #80002a; } 
     .tag-hype        { background: #FFB703; color: #1a1a1a; box-shadow: 4px 4px 0px #b38600; } 
     .tag-shock       { background: #70D6FF; color: #1a1a1a; box-shadow: 4px 4px 0px #386b80; } 
-    .tag-epic        { background: #FFBE0B; color: #1a1a1a; box-shadow: 4px 4px 0px #805f06; }
     .tag-neutral     { background: #ffffff; color: #1a1a1a; box-shadow: 4px 4px 0px #ccc; }
 
     /* --- FOOTER --- */
-    .the-end {
-      text-align: center; color: #ccc; font-weight: 800; font-size: 14px;
-      margin-top: 80px; letter-spacing: 2px;
-    }
-    
-    .footer-bar {
-      position: absolute; bottom: 24px; left: 24px; right: 24px;
-      display: flex; justify-content: space-between; align-items: center;
-      color: #aaa; font-size: 12px; font-weight: 700;
-    }
-    .footer-bar a {
-      color: #aaa; text-decoration: none; transition: color 0.2s ease;
-    }
+    .the-end { text-align: center; color: #ccc; font-weight: 800; font-size: 14px; margin-top: 80px; letter-spacing: 2px; }
+    .footer-bar { position: absolute; bottom: 24px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: center; color: #aaa; font-size: 12px; font-weight: 700; }
+    .footer-bar a { color: #aaa; text-decoration: none; transition: color 0.2s ease; }
     .footer-bar a:hover { color: #1a1a1a; }
 
     /* --- MODAL --- */
-    body.animating .tag, body.animating .card { transition: none !important; pointer-events: none !important; }
-
-    #expansionOverlay {
-      position: fixed; z-index: 10000; display: none; pointer-events: auto;
-      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    #expansionOverlay.active {
-      top: 40px !important; left: 40px !important;
-      width: calc(100vw - 80px) !important; height: calc(100vh - 80px) !important;
-    }
-
-    #modalSlotReplica, #modalDetailsView { position: absolute; inset: 0; display: flex; flex-direction: column; }
-    #modalSlotReplica { z-index: 1; opacity: 1; transition: opacity 0.3s ease; }
-    #expansionOverlay.active #modalSlotReplica { opacity: 0; }
-
-    #modalDetailsView { 
-      z-index: 2; opacity: 0; pointer-events: none; background: #fff; 
-      border-radius: 40px; border: 5px solid #1a1a1a; overflow: hidden; transition: opacity 0.3s ease; 
-    }
+    #expansionOverlay { position: fixed; z-index: 10000; display: none; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+    #expansionOverlay.active { top: 40px !important; left: 40px !important; width: calc(100vw - 80px) !important; height: calc(100vh - 80px) !important; }
+    #modalDetailsView { z-index: 2; opacity: 0; background: #fff; border-radius: 40px; border: 5px solid #1a1a1a; overflow: hidden; transition: opacity 0.3s ease; }
     #expansionOverlay.active #modalDetailsView { opacity: 1; pointer-events: auto; box-shadow: 25px 25px 0px #1a1a1a; }
-
     #modalMainContent { display: flex; flex-direction: row; height: 100%; width: 100%; }
-    
-    .visual-expanded-container {
-      position: relative; background: #ffffff; flex: 0 0 50%;
-      border-right: 5px solid #1a1a1a;
-      display: flex; align-items: center; justify-content: center;
-    }
-    
-    .slide {
-      position: absolute; inset: 30px; 
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.4s ease; z-index: 1;
-    }
+    .visual-expanded-container { position: relative; background: #ffffff; flex: 0 0 50%; border-right: 5px solid #1a1a1a; display: flex; align-items: center; justify-content: center; }
+    .slide { position: absolute; inset: 30px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; }
     .slide.active { opacity: 1; z-index: 2; }
-
-    .slide img, .texture-slide-inner { 
-      max-width: 100%; max-height: 100%; width: auto; height: auto;
-      object-fit: contain; border-radius: 30px;
-      border: 5px solid #1a1a1a; background: #f9f9f9;
-      box-shadow: 10px 10px 0px #f0f0f0;
-    }
-    .texture-slide-inner { width: 100%; height: 100%; }
-
-    .slide-btn {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: #ffffff; color: #1a1a1a;
-      border: 5px solid #1a1a1a; border-radius: 15px;
-      box-shadow: 4px 4px 0px #f0f0f0;
-      width: 50px; height: 50px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; cursor: pointer; z-index: 10; 
-      transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    .slide-btn:hover { background: #f9f9f9; transform: translateY(calc(-50% - 4px)); box-shadow: 8px 8px 0px #e8e8e8; }
-    .slide-btn.prev { left: 10px; }
-    .slide-btn.next { right: 10px; }
-
-    .close-x { 
-      position: absolute; top: 15px; right: 15px; 
-      background: #ffffff; color: #1a1a1a; 
-      border: 5px solid #1a1a1a; border-radius: 15px;
-      box-shadow: 4px 4px 0px #f0f0f0;
-      width: 50px; height: 50px; 
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; cursor: pointer; z-index: 100;
-      transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    .close-x:hover { transform: translateY(-4px); box-shadow: 8px 8px 0px #e8e8e8; color: #FF0054; }
-
-    .modal-expanded-info { padding: 40px; flex: 1; overflow-y: auto; background: #fff; position: relative; }
-    .desc-full { font-size: 18px; color: #1a1a1a; font-weight: 500; line-height: 1.7; margin-top: 10px; }
+    .slide img, .texture-slide-inner { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 30px; border: 5px solid #1a1a1a; background: #f9f9f9; box-shadow: 10px 10px 0px #f0f0f0; }
     
+    .btn-hitbox {
+      position: absolute; width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 10;
+    }
+    .slide-btn, .close-x {
+      background: #ffffff; color: #1a1a1a; border: 5px solid #1a1a1a; border-radius: 15px; box-shadow: 4px 4px 0px #f0f0f0; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    }
+    .btn-hitbox:hover .slide-btn, .btn-hitbox:hover .close-x { transform: translateY(-4px); box-shadow: 8px 8px 0px #e8e8e8; }
+    .btn-hitbox:hover .close-x { color: #FF0054; }
+
+    .prev-hitbox { left: 10px; top: 50%; transform: translateY(-50%); }
+    .next-hitbox { right: 10px; top: 50%; transform: translateY(-50%); }
+    .close-hitbox { right: 15px; top: 15px; }
+
+    .modal-expanded-info { padding: 40px; flex: 1; overflow-y: auto; background: #fff; }
+    .desc-full { font-size: 18px; color: #1a1a1a; font-weight: 500; line-height: 1.7; margin-top: 10px; }
     #dimmer { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); opacity: 0; pointer-events: none; z-index: 9998; transition: opacity 0.5s ease; }
     #dimmer.visible { opacity: 1; pointer-events: auto; }
 
-    /* --- MOBILE --- */
     @media (max-width: 800px) {
-      .hero { padding: 80px 16px 20px; }
-      .item-grid { grid-template-columns: 1fr; gap: 40px; }
-      #expansionOverlay.active {
-        top: 12px !important; left: 12px !important;
-        width: calc(100vw - 24px) !important; height: calc(100vh - 24px) !important;
-      }
-      #modalDetailsView { border-radius: 25px; border-width: 4px; }
+      .hero { padding: 35px 16px 20px; } /* Shrunk mobile top gap */
+      .item-grid { grid-template-columns: 1fr; }
+      #expansionOverlay.active { top: 12px !important; left: 12px !important; width: calc(100vw - 24px) !important; height: calc(100vh - 24px) !important; }
       #modalMainContent { flex-direction: column; }
       .visual-expanded-container { flex: 0 0 35%; border-right: none; border-bottom: 4px solid #1a1a1a; }
-      .slide { inset: 12px; }
-      .slide img, .texture-slide-inner { border-width: 3px; border-radius: 18px; }
-      .modal-expanded-info { padding: 20px; }
-      .slot-title#eTitle { font-size: 26px !important; }
-      .desc-full { font-size: 15px; line-height: 1.5; }
-      .slide-btn, .close-x { width: 38px; height: 38px; font-size: 16px; border-width: 3px; border-radius: 10px; }
-      .close-x { top: 8px; right: 8px; }
-      .footer-bar { position: static; flex-direction: column; gap: 8px; text-align: center; margin-top: 40px; padding-bottom: 20px; }
+      .footer-bar { position: static; flex-direction: column; text-align: center; margin-top: 40px; padding-bottom: 20px; }
+      .slide { inset: 15px; }
+      .tag { bottom: -10px; right: -5px; padding: 6px 14px; font-size: 12px; }
     }
   </style>
 </head>
@@ -244,18 +172,21 @@
 <div id="dimmer" onclick="closeExpanded()"></div>
 
 <div class="hero">
-  <h1>things and <span class="title-badge">s***.</span></h1>
+  <h1>things and 
+    <div class="title-badge-hitbox">
+      <span class="title-badge">s***.</span>
+    </div>
+  </h1>
 </div>
 
 <div class="container">
   <div class="sort-wrapper">
-    <div class="sort-tag active" onclick="filterGrid('all', this)">all</div>
-    <div class="sort-tag" onclick="filterGrid('thing', this)">things</div>
-    <div class="sort-tag" onclick="filterGrid('s***', this)">s***</div>
+    <div class="sort-tag-hitbox" onclick="filterGrid('all', this)"><div class="sort-tag active">all</div></div>
+    <div class="sort-tag-hitbox" onclick="filterGrid('thing', this)"><div class="sort-tag">things</div></div>
+    <div class="sort-tag-hitbox" onclick="filterGrid('s***', this)"><div class="sort-tag">s***</div></div>
   </div>
   
   <div class="item-grid" id="mainGrid"></div>
-  
   <div class="the-end">the end.</div>
 </div>
 
@@ -265,15 +196,22 @@
 </div>
 
 <div id="expansionOverlay">
-  <div id="modalSlotReplica"></div>
+  <div id="modalSlotReplica" style="position:absolute; inset:0; z-index:1;"></div>
 
-  <div id="modalDetailsView">
-    <button class="close-x" onclick="closeExpanded()"><i class="fa-solid fa-xmark"></i></button>
+  <div id="modalDetailsView" style="position:absolute; inset:0; display:flex; flex-direction:column;">
+    <div class="btn-hitbox close-hitbox" onclick="closeExpanded()">
+      <div class="close-x"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    
     <div id="modalMainContent">
-      <div class="visual-expanded-container" id="visualContainer">
+      <div class="visual-expanded-container">
         <div id="slideshow" style="width:100%; height:100%; position:relative;">
-          <button class="slide-btn prev" onclick="changeSlide(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="slide-btn next" onclick="changeSlide(1)"><i class="fa-solid fa-chevron-right"></i></button>
+          <div class="btn-hitbox prev-hitbox" onclick="changeSlide(-1)">
+            <div class="slide-btn"><i class="fa-solid fa-chevron-left"></i></div>
+          </div>
+          <div class="btn-hitbox next-hitbox" onclick="changeSlide(1)">
+            <div class="slide-btn"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
         </div>
       </div>
       <div class="modal-expanded-info">
@@ -291,40 +229,24 @@
       id: 1, category: "thing", title: "the nelson rock", date: "march 15th, 2026",
       tag: "Aw s***.", shortDesc: "deceptive pebbles and an adrenaline crash.",
       fullDesc: "I was walking across a massive rock that was packed with embedded pebbles. I honestly thought those pebbles would act like grip tape for my shoes, but they did the exact opposite, it was like stepping on ball bearings. I went down hard. I was wearing a jacket, which luckily kept the open wounds from getting immediate dirt or infection, but it still shredded my arms. The crazy part is it didn't even hurt that much at first. If you look at the photos from the car right after, I'm not even flinching. But the second I stood up and tried to walk away, the adrenaline wore off FAST. Suddenly every scrape and grit-burn hit me all at once. This rock is the physical receipt for that lesson.",
-      images: [
-        'images/nelsons_rock/rock-1.jpeg', 
-        'images/nelsons_rock/rock-2.jpeg', 
-        'images/nelsons_rock/rock-3.jpeg',
-        'images/nelsons_rock/heal-1.jpeg', 
-        'images/nelsons_rock/heal-2.jpeg', 
-        'images/nelsons_rock/heal-3.jpeg'
-      ]
+      images: ['images/nelsons_rock/rock-1.jpeg', 'images/nelsons_rock/rock-2.jpeg', 'images/nelsons_rock/rock-3.jpeg', 'images/nelsons_rock/heal-1.jpeg', 'images/nelsons_rock/heal-2.jpeg', 'images/nelsons_rock/heal-3.jpeg']
     },
     {
       id: 2, category: "s***", title: "s*** placeholder", date: "ongoing",
       tag: "F*** yeah!", shortDesc: "for the memories that don't have a shape.",
-      fullDesc: "A placeholder for the entries that exist in thought but haven't taken physical form. This slot represents the abstract side of the archive, housing stories and contexts that lack a tangible object.",
+      fullDesc: "A placeholder for the entries that exist in thought but haven't taken physical form. This slot represents the abstract side of the archive.",
       images: ["texture"]
     },
     {
-        id: 3, category: "thing", title: "placeholder", date: "none",
-        tag: "Whoa.", shortDesc: "testing the limits of the layout.",
-        fullDesc: "A generic entry used to demonstrate the tag system and grid structure. This serves as a structural anchor for the collection until a new physical object is added.",
-        images: ["https://placehold.co/600x400/fff/1a1a1a?text=Placeholder"]
+      id: 3, category: "thing", title: "object placeholder", date: "none",
+      tag: "Whoa.", shortDesc: "testing the limits of the layout.",
+      fullDesc: "A structural anchor for the collection until a new physical object is added. This serves to demonstrate the grid and tag systems.",
+      images: ["https://placehold.co/600x400/fff/1a1a1a?text=Placeholder"]
     }
   ];
 
   let originCard = null;
   let currentSlideIndex = 0;
-
-  function getTagClass(tagText) {
-    if (!tagText) return '';
-    const t = tagText.toLowerCase();
-    if (t.includes('s***')) return 'tag-frustration';
-    if (t.includes('yeah')) return 'tag-hype';
-    if (t.includes('whoa')) return 'tag-shock';
-    return 'tag-neutral';
-  }
 
   function renderGrid(cat = 'all') {
     const grid = document.getElementById('mainGrid');
@@ -333,12 +255,14 @@
     
     filtered.forEach(item => {
       const card = document.createElement('div');
-      card.className = `card`;
+      card.className = 'card';
       card.onclick = () => openExpanded(card, item);
       
+      const lowTag = item.tag.toLowerCase();
+      const tagClass = lowTag.includes('s***') ? 'tag-frustration' : (lowTag.includes('f***') ? 'tag-hype' : (lowTag.includes('whoa') ? 'tag-shock' : 'tag-neutral'));
       const visualHTML = item.images[0] === 'texture' 
         ? '<div class="slot-visual" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;"><div class="shit-icon" style="font-family:\'Alfa Slab One\'; color:#ddd; font-size:60px;">s***</div></div>'
-        : `<div class="slot-visual"><img src="${item.images[0]}" alt="${item.title}"></div>`;
+        : `<div class="slot-visual"><img src="${item.images[0]}"></div>`;
       
       card.innerHTML = `
         <div class="slot-design">
@@ -348,111 +272,70 @@
             <div class="slot-desc-short">${item.shortDesc}</div>
           </div>
         </div>
-        ${item.tag ? `<div class="tag ${getTagClass(item.tag)}">${item.tag}</div>` : ''}
+        <div class="tag ${tagClass}">${item.tag}</div>
       `;
       grid.appendChild(card);
     });
   }
 
-  function filterGrid(cat, btn) {
+  function filterGrid(cat, hit) {
     document.querySelectorAll('.sort-tag').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
+    hit.querySelector('.sort-tag').classList.add('active');
     renderGrid(cat);
-  }
-
-  function showSlide(index) {
-    const slides = document.querySelectorAll('.slide');
-    if(slides.length === 0) return;
-    slides.forEach(s => s.classList.remove('active'));
-    
-    if (index >= slides.length) currentSlideIndex = 0;
-    else if (index < 0) currentSlideIndex = slides.length - 1;
-    else currentSlideIndex = index;
-
-    slides[currentSlideIndex].classList.add('active');
-  }
-
-  function changeSlide(direction) {
-    showSlide(currentSlideIndex + direction);
   }
 
   function openExpanded(card, item) {
     originCard = card;
-    const body = document.getElementById('mainBody');
     const overlay = document.getElementById('expansionOverlay');
-    const dimmer = document.getElementById('dimmer');
     const ss = document.getElementById('slideshow');
-    
-    const slotBox = card.querySelector('.slot-design');
-    const rect = slotBox.getBoundingClientRect();
+    const rect = card.querySelector('.slot-design').getBoundingClientRect();
 
     document.getElementById('eTitle').textContent = item.title;
     document.getElementById('eDate').textContent = item.date;
     document.getElementById('eText').textContent = item.fullDesc;
 
+    const navButtons = ss.querySelectorAll('.btn-hitbox:not(.close-hitbox)');
+    navButtons.forEach(btn => btn.style.display = item.images.length > 1 ? 'flex' : 'none');
+
     const replica = document.getElementById('modalSlotReplica');
     replica.innerHTML = '';
-    const clonedBox = slotBox.cloneNode(true);
-    clonedBox.style.width = '100%';
-    clonedBox.style.height = '100%';
-    clonedBox.style.margin = '0';
-    replica.appendChild(clonedBox);
+    const cloned = card.querySelector('.slot-design').cloneNode(true);
+    cloned.style.transform = 'none';
+    cloned.style.width = '100%'; cloned.style.height = '100%';
+    replica.appendChild(cloned);
 
-    const realTag = card.querySelector('.tag');
-    if (realTag) {
-      overlay.appendChild(realTag);
-    }
+    overlay.appendChild(card.querySelector('.tag'));
 
     currentSlideIndex = 0;
     ss.querySelectorAll('.slide').forEach(s => s.remove());
-    const btns = ss.querySelectorAll('.slide-btn');
+    item.images.forEach((src, i) => {
+      const s = document.createElement('div');
+      s.className = `slide ${i === 0 ? 'active' : ''}`;
+      s.innerHTML = src === 'texture' ? '<div class="texture-slide-inner" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;"><div style="font-family:\'Alfa Slab One\'; color:#bbb; font-size:60px;">s***</div></div>' : `<img src="${src}">`;
+      ss.insertBefore(s, ss.firstChild);
+    });
 
-    if (item.images[0] === 'texture') {
-        btns.forEach(b => b.style.display = 'none');
-        const textureSlide = document.createElement('div');
-        textureSlide.className = 'slide active';
-        textureSlide.innerHTML = '<div class="texture-slide-inner" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;"><div class="shit-icon" style="color: #bbb; font-family:\'Alfa Slab One\'; font-size:60px;">s***</div></div>';
-        ss.insertBefore(textureSlide, ss.firstChild);
-    } else {
-        btns.forEach(b => b.style.display = item.images.length > 1 ? 'flex' : 'none');
-        item.images.forEach((src, i) => {
-            const s = document.createElement('div');
-            s.className = `slide ${i === 0 ? 'active' : ''}`;
-            s.innerHTML = `<img src="${src}" alt="${item.title} slide ${i+1}" onerror="this.src='https://placehold.co/600x400/ccc/777?text=Image+Not+Found'">`;
-            ss.insertBefore(s, ss.firstChild);
-        });
-    }
-
-    body.classList.add('animating');
     overlay.style.transition = 'none';
     overlay.style.display = 'block';
     overlay.style.top = rect.top + 'px';
     overlay.style.left = rect.left + 'px';
     overlay.style.width = rect.width + 'px';
     overlay.style.height = rect.height + 'px';
-    
-    slotBox.style.visibility = 'hidden'; 
+    card.style.visibility = 'hidden';
 
     requestAnimationFrame(() => {
-      dimmer.classList.add('visible');
+      document.getElementById('dimmer').classList.add('visible');
       overlay.style.transition = 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
       overlay.classList.add('active');
     });
-
-    setTimeout(() => body.classList.remove('animating'), 500);
     document.body.style.overflow = 'hidden';
   }
 
   function closeExpanded() {
-    const body = document.getElementById('mainBody');
     const overlay = document.getElementById('expansionOverlay');
-    const dimmer = document.getElementById('dimmer');
-    const slotBox = originCard.querySelector('.slot-design');
-    const rect = slotBox.getBoundingClientRect();
-
-    body.classList.add('animating');
-    dimmer.classList.remove('visible');
-    overlay.classList.remove('active'); 
+    const rect = originCard.querySelector('.slot-design').getBoundingClientRect();
+    document.getElementById('dimmer').classList.remove('visible');
+    overlay.classList.remove('active');
     overlay.style.top = rect.top + 'px';
     overlay.style.left = rect.left + 'px';
     overlay.style.width = rect.width + 'px';
@@ -460,34 +343,21 @@
 
     setTimeout(() => {
       overlay.style.display = 'none';
-      slotBox.style.visibility = 'visible';
-      
-      const realTag = overlay.querySelector('.tag');
-      if (realTag) {
-        originCard.appendChild(realTag);
-      } 
-
-      body.classList.remove('animating');
+      originCard.style.visibility = 'visible';
+      originCard.appendChild(overlay.querySelector('.tag'));
       document.body.style.overflow = 'auto';
     }, 500);
   }
 
+  function changeSlide(n) {
+    const slides = document.querySelectorAll('.slide');
+    if (slides.length <= 1) return;
+    slides[currentSlideIndex].classList.remove('active');
+    currentSlideIndex = (currentSlideIndex + n + slides.length) % slides.length;
+    slides[currentSlideIndex].classList.add('active');
+  }
+
   renderGrid();
 </script>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "things and s***.",
-  "url": "https://things-and-shit.org/",
-  "description": "An archive of random objects and adrenaline crashes.",
-  "author": {
-    "@type": "Organization",
-    "name": "4SP"
-  }
-}
-</script>
-
 </body>
 </html>
