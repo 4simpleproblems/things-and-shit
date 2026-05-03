@@ -62,7 +62,7 @@
       background: #ffffff;
       border: 5px solid #1a1a1a;
       border-radius: 40px;
-      overflow: hidden; 
+      overflow: hidden; /* Masks the image only */
       box-shadow: 10px 10px 0px #f0f0f0;
       transition: box-shadow 0.4s ease;
     }
@@ -104,11 +104,21 @@
 
     /* --- FOOTER ELEMENTS --- */
     .the-end {
-      text-align: center; color: #ccc; font-weight: 800; font-size: 14px;
-      margin-top: 80px; letter-spacing: 2px;
+      text-align: center;
+      color: #ccc;
+      font-weight: 800;
+      font-size: 14px;
+      margin-top: 80px;
+      letter-spacing: 2px;
     }
+
     .footer-copy {
-      position: absolute; bottom: 24px; left: 24px; color: #aaa; font-size: 12px; font-weight: 700;
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      color: #aaa;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     /* --- MODAL SYSTEM --- */
@@ -134,8 +144,6 @@
     #expansionOverlay.active #modalDetailsView { opacity: 1; pointer-events: auto; box-shadow: 25px 25px 0px #1a1a1a; }
 
     #modalMainContent { display: flex; flex-direction: column; height: 100%; width: 100%; }
-    
-    /* MODAL UI: Inner Padding Restored */
     .visual-expanded-container {
       position: relative; background: #ffffff; flex: 0 0 55%;
       display: flex; align-items: center; justify-content: center;
@@ -143,24 +151,22 @@
     
     .slide {
       position: absolute; 
-      inset: 30px; /* Provides the generous padding around the squircle image */
+      inset: 30px; 
       display: flex; align-items: center; justify-content: center;
       opacity: 0; transition: opacity 0.4s ease;
       z-index: 1;
     }
     .slide.active { opacity: 1; z-index: 2; }
 
-    /* Modal Images matching Slot Design */
     .slide img, .texture-slide-inner { 
       width: 100%; height: 100%; 
       object-fit: cover;
-      border-radius: 30px; /* Squircle */
+      border-radius: 30px;
       border: 5px solid #1a1a1a;
       background: #f9f9f9;
       box-shadow: 10px 10px 0px #f0f0f0;
     }
 
-    /* Modal Buttons matching Slot Design */
     .slide-btn {
       position: absolute; top: 50%; transform: translateY(-50%);
       background: #ffffff; color: #1a1a1a;
@@ -186,7 +192,6 @@
     }
     .close-x:hover { transform: translateY(-5px); box-shadow: 0px 12px 0px #e8e8e8; color: #FF0054; }
 
-    /* Modal Text */
     .modal-expanded-info { padding: 10px 40px 40px 40px; flex: 1; overflow-y: auto; background: #fff; position: relative; }
     .desc-full { font-size: 18px; color: #1a1a1a; font-weight: 500; line-height: 1.7; margin-top: 10px; }
     
@@ -244,9 +249,12 @@
       tag: "Aw s***.", shortDesc: "deceptive pebbles and an adrenaline crash.",
       fullDesc: "I was walking across a massive rock that was packed with embedded pebbles. I honestly thought those pebbles would act like grip tape for my shoes, but they did the exact opposite, it was like stepping on ball bearings. I went down hard. I was wearing a jacket, which luckily kept the open wounds from getting immediate dirt or infection, but it still shredded my arms. The crazy part is it didn't even hurt that much at first. If you look at the photos from the car right after, I'm not even flinching. But the second I stood up and tried to walk away, the adrenaline wore off FAST. Suddenly every scrape and grit-burn hit me all at once. This rock is the physical receipt for that lesson.",
       images: [
-        'https://placehold.co/600x400/fff/1a1a1a?text=Context+Nelson+Rock', 
-        'https://placehold.co/600x400/fff/1a1a1a?text=Technical+View+of+Pebbles', 
-        'https://placehold.co/600x400/fff/1a1a1a?text=Post-Crash+Damage'
+        'images/nelsons_rock/rock-1.jpeg', 
+        'images/nelsons_rock/rock-2.jpeg', 
+        'images/nelsons_rock/rock-3.jpeg',
+        'images/nelsons_rock/heal-1.jpeg', 
+        'images/nelsons_rock/heal-2.jpeg', 
+        'images/nelsons_rock/heal-3.jpeg'
       ]
     },
     {
