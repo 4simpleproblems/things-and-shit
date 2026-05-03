@@ -158,9 +158,22 @@
     }
     .slide.active { opacity: 1; z-index: 2; }
 
-    .slide img, .texture-slide-inner { 
+    /* IMAGE SIZING FIX: Respects aspect ratio and caps out at container bounds */
+    .slide img { 
+      max-width: 100%; 
+      max-height: 100%; 
+      width: auto; 
+      height: auto;
+      object-fit: contain;
+      border-radius: 30px;
+      border: 5px solid #1a1a1a;
+      background: #f9f9f9;
+      box-shadow: 10px 10px 0px #f0f0f0;
+    }
+
+    /* Keeps the texture abstract block full size */
+    .texture-slide-inner {
       width: 100%; height: 100%; 
-      object-fit: cover;
       border-radius: 30px;
       border: 5px solid #1a1a1a;
       background: #f9f9f9;
@@ -343,12 +356,12 @@
     const slotBox = card.querySelector('.slot-design');
     const rect = slotBox.getBoundingClientRect();
 
-    // 1. Text Content
+    // 1. Reset Text Content
     document.getElementById('eTitle').textContent = item.title;
     document.getElementById('eDate').textContent = item.date;
     document.getElementById('eText').textContent = item.fullDesc;
 
-    // 2. Clone Box for Hero Animation
+    // 2. Clone the BOX into the Replica
     const replica = document.getElementById('modalSlotReplica');
     replica.innerHTML = '';
     const clonedBox = slotBox.cloneNode(true);
@@ -357,7 +370,7 @@
     clonedBox.style.margin = '0';
     replica.appendChild(clonedBox);
 
-    // 3. Move Tag into Overlay
+    // 3. Move the ACTUAL Tag into the Overlay
     const realTag = card.querySelector('.tag');
     if (realTag) {
       overlay.appendChild(realTag);
