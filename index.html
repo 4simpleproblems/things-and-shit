@@ -616,7 +616,7 @@
   function renderBoardGrid(cat = 'all') {
     const grid = document.getElementById('boardGrid');
     const filtered = cat === 'all' ? userItems : userItems.filter(i => i.category === cat);
-    if(filtered.length === 0) { grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#ccc; font-weight:900;">LOCAL CACHE EMPTY.</p>`; return; }
+    if(filtered.length === 0) { grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#ccc; font-weight:900;">BOARD EMPTY.</p>`; return; }
     grid.innerHTML = filtered.map(item => getCardHTML(item, true)).join('');
   }
 
