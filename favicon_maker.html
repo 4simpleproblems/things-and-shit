@@ -17,7 +17,7 @@
       overflow-x: hidden;
     }
 
-    /* --- HEADER --- */
+    /* header */
     .hero { padding: 80px 24px 40px; text-align: center; }
     .hero h1 { 
       font-family: 'Alfa Slab One', serif; 
@@ -33,11 +33,11 @@
     }
     .hero p { font-weight: 800; color: #ccc; margin-top: 20px; text-transform: uppercase; letter-spacing: 4px; font-size: 12px; }
 
-    /* --- LAYOUT --- */
+    /* layout */
     .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
     @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
 
-    /* --- CONTROLS --- */
+    /* controls */
     .controls-panel {
       background: #ffffff; border: 5px solid #1a1a1a; border-radius: 30px; padding: 30px;
       box-shadow: 10px 10px 0px #f0f0f0;
@@ -53,7 +53,6 @@
     }
     textarea:focus { background: #fff; box-shadow: 4px 4px 0px #e8e8e8; }
 
-    /* Sliders */
     .slider {
       -webkit-appearance: none; width: 100%; height: 10px; border-radius: 5px;
       background: #e8e8e8; outline: none; border: 2px solid #1a1a1a;
@@ -71,12 +70,11 @@
     }
     .download-btn:hover { transform: translateY(4px); box-shadow: 2px 2px 0px #1a1a1a; background: #ffc436; }
 
-    /* --- PREVIEW --- */
+    /* preview */
     .preview-panel {
       background: #f9f9f9; border: 5px solid #1a1a1a; border-radius: 30px;
       display: flex; align-items: center; justify-content: center; padding: 40px;
       box-shadow: 10px 10px 0px #f0f0f0;
-      /* Checkerboard background to see transparency */
       background-image: 
         linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee),
         linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee);
@@ -182,7 +180,6 @@
     const shadowOffset = parseInt(document.getElementById('shadow').value);
     const spacingRatio = parseInt(document.getElementById('lineSpacing').value) / 100;
     
-    // New Controls
     const xPos = parseInt(document.getElementById('xPos').value);
     const yPos = parseInt(document.getElementById('yPos').value);
     const roundness = parseInt(document.getElementById('roundness').value);
@@ -195,11 +192,10 @@
 
     const totalH = lines.length * lineHeight;
     
-    // Apply X and Y coordinates to the center calculations
     const centerX = (size / 2) + xPos;
     const startY = ((size - totalH) / 2) + (lineHeight / 2) + yPos;
 
-    // LAYER 1: The Black Gooey Border Blob
+    // layer 1: black blob
     const tmpLayer = document.createElement('canvas');
     tmpLayer.width = size; tmpLayer.height = size;
     const tCtx = tmpLayer.getContext('2d');
@@ -219,7 +215,7 @@
 
     applySoftThreshold(tCtx);
 
-    // LAYER 2: The White Gooey Inner Blob
+    // layer 2: white blob
     const tmpLayerWhite = document.createElement('canvas');
     tmpLayerWhite.width = size; tmpLayerWhite.height = size;
     const tCtxW = tmpLayerWhite.getContext('2d');
@@ -239,15 +235,14 @@
 
     applySoftThreshold(tCtxW);
 
-    // ASSEMBLE EVERYTHING
+    // assemble
     ctx.save();
     
-    // Rotate around the newly calculated center position
     ctx.translate(centerX, (size / 2) + yPos);
     ctx.rotate(rot * Math.PI / 180);
     ctx.translate(-centerX, -((size / 2) + yPos));
 
-    // Cast the brutalist shadow
+    // shadow
     if (shadowOffset > 0) {
       ctx.shadowOffsetX = shadowOffset;
       ctx.shadowOffsetY = shadowOffset;
@@ -255,16 +250,13 @@
       ctx.shadowBlur = 0; 
     }
 
-    // Draw Black Border Base
     ctx.drawImage(tmpLayer, 0, 0);
 
-    // Reset shadow so it doesn't duplicate inside
     ctx.shadowColor = 'transparent';
 
-    // Draw White Inner Base
     ctx.drawImage(tmpLayerWhite, 0, 0);
 
-    // Draw The Text
+    // text
     ctx.fillStyle = '#1a1a1a';
     ctx.font = `900 ${fontSize}px 'Alfa Slab One'`;
     ctx.textAlign = 'center';
@@ -284,13 +276,14 @@
     link.click();
   }
 
-  // Attach auto-draw to all inputs
+  // auto-draw
   document.querySelectorAll('input, textarea').forEach(el => {
     el.addEventListener('input', drawFavicon);
   });
 
-  // Force draw only AFTER the custom font physically loads
+  // draw on font load
   document.fonts.ready.then(drawFavicon);
 </script>
 </body>
 </html>
+<!-- Made with ❤️ from 4SP -->
