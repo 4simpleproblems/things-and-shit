@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>trace and s***.</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { 
+      font-family: 'Nunito', sans-serif; 
+      background: #ffffff; 
+      color: #1a1a1a; 
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* header */
+    .hero { padding: 60px 24px 20px; text-align: center; } 
+    .hero h1 { 
+      font-family: 'Alfa Slab One', serif; 
+      font-size: clamp(30px, 8vw, 60px); 
+      color: #1a1a1a; 
+      line-height: 1.2;
+      letter-spacing: -2px;
+    }
+    .title-badge {
+      display: inline-block; padding: 5px 20px; background: #ffffff; border: 5px solid #1a1a1a; border-radius: 15px;
+      transform: rotate(-3deg); margin-left: 10px; box-shadow: 6px 6px 0px #f0f0f0;
+    }
+
+    /* controls */
+    .controls-container {
+      max-width: 800px; margin: 20px auto 40px; padding: 30px;
+      background: #fff; border: 5px solid #1a1a1a; border-radius: 30px;
+      box-shadow: 10px 10px 0px #f0f0f0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+    }
+
+    .control-group { display: flex; flex-direction: column; gap: 10px; }
+    .control-group label { font-family: 'Alfa Slab One', serif; font-size: 14px; text-transform: lowercase; }
+
+    /* input styling */
+    .btn-main {
+      background: #FFB703; color: #1a1a1a; border: 5px solid #1a1a1a; padding: 15px;
+      border-radius: 15px; font-family: 'Alfa Slab One', serif; font-size: 16px; 
+      cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-main:hover { transform: translateY(-4px); box-shadow: 6px 6px 0px #1a1a1a; }
+    .btn-trace { background: #1a1a1a; color: #fff; grid-column: span 2; font-size: 20px; margin-top: 10px; }
+
+    input[type="range"] {
+      -webkit-appearance: none; width: 100%; height: 12px; background: #f0f0f0;
+      border: 3px solid #1a1a1a; border-radius: 10px; outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 24px; height: 24px; background: #FFB703;
+      border: 3px solid #1a1a1a; border-radius: 8px; cursor: pointer;
+    }
+
+    /* lightbox area */
+    #lightbox {
+      flex: 1; position: relative; margin: 0 24px 40px;
+      border: 5px dashed #ccc; border-radius: 40px; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: #fafafa; min-height: 500px;
+    }
+
+    #traceImg {
+      max-width: none; transition: transform 0.1s ease-out;
+      pointer-events: auto; user-select: none; -webkit-user-drag: none;
+    }
+
+    /* tracing mode active */
+    body.tracing-active { background: #000; overflow: hidden; }
+    body.tracing-active .hero, body.tracing-active .controls-container { display: none; }
+    body.tracing-active #lightbox { 
+      margin: 0; border: none; border-radius: 0; width: 100vw; height: 100vh; background: #fff; 
+    }
+    body.tracing-active #traceImg { pointer-events: none; } /* kills touch interaction */
+
+    .esc-hint {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      font-family: 'Alfa Slab One', serif; background: #FF0054; color: #fff;
+      padding: 10px 20px; border-radius: 10px; font-size: 12px; opacity: 0;
+      transition: opacity 0.5s; pointer-events: none; z-index: 1000;
+    }
+    body.tracing-active .esc-hint { opacity: 0.8; }
+
+    @media (max-width: 700px) {
+      .controls-container { grid-template-columns: 1fr; margin: 20px; }
+      .btn-trace { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="esc-hint">PRESS [ESC] TO EXIT TRACE MODE</div>
+
+  <section class="hero">
+    <h1>trace & <span class="title-badge">s***.</span></h1>
+  </section>
+
+  <div class="controls-container">
+    <div class="control-group">
+      <label>1. choose image</label>
+      <label for="imgUpload" class="btn-main">Upload Reference</label>
+      <input type="file" id="imgUpload" accept="image/*" style="display:none">
+    </div>
+
+    <div class="control-group">
+      <label>2. zoom level</label>
+      <input type="range" id="zoomSlider" min="0.1" max="5" step="0.01" value="1">
+    </div>
+
+    <div class="control-group">
+      <label>horizontal offset</label>
+      <input type="range" id="posX" min="-1000" max="1000" value="0">
+    </div>
+
+    <div class="control-group">
+      <label>vertical offset</label>
+      <input type="range" id="posY" min="-1000" max="1000" value="0">
+    </div>
+
+    <button class="btn-main btn-trace" onclick="enterTraceMode()">
+      <i class="fa-solid fa-expand"></i> ENTER TRACE MODE
+    </button>
+  </div>
+
+  <div id="lightbox">
+    <img id="traceImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="">
+    <div id="placeholderText" style="font-family:'Alfa Slab One'; color:#ccc; font-size:24px; text-align:center;">
+      DRAG IMAGE HERE <br> OR USE UPLOAD BUTTON
+    </div>
+  </div>
+
+  <script>
+    const imgUpload = document.getElementById('imgUpload');
+    const traceImg = document.getElementById('traceImg');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const posX = document.getElementById('posX');
+    const posY = document.getElementById('posY');
+    const placeholderText = document.getElementById('placeholderText');
+    const body = document.body;
+
+    // Handle Upload
+    imgUpload.onchange = e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = event => {
+          traceImg.src = event.target.result;
+          placeholderText.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // Apply Transformations
+    function updateTransform() {
+      traceImg.style.transform = `translate(${posX.value}px, ${posY.value}px) scale(${zoomSlider.value})`;
+    }
+
+    [zoomSlider, posX, posY].forEach(input => {
+      input.oninput = updateTransform;
+    });
+
+    // Trace Mode Logic
+    function enterTraceMode() {
+      if (traceImg.src.includes('data:image/gif')) {
+        alert("Upload something first!");
+        return;
+      }
+      
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+      
+      body.classList.add('tracing-active');
+    }
+
+    // Exit via Escape Key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
+        body.classList.remove('tracing-active');
+      }
+    });
+
+    // Sync state if fullscreen is closed via browser UI
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        body.classList.remove('tracing-active');
+      }
+    });
+
+    // Drag and Drop support
+    const lightbox = document.getElementById('lightbox');
+    lightbox.ondragover = e => e.preventDefault();
+    lightbox.ondrop = e => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = event => {
+          traceImg.src = event.target.result;
+          placeholderText.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  </script>
+</body>
+</html>
