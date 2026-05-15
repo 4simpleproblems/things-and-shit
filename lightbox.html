@@ -10,31 +10,21 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body { 
-      font-family: 'Nunito', sans-serif; 
-      background: #ffffff; 
-      color: #1a1a1a; 
-      overflow-x: hidden;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
     /* header */
-    .hero { padding: 60px 24px 20px; text-align: center; } 
+    .hero { padding: 80px 40px 20px; text-align: center; } 
     .hero h1 { 
       font-family: 'Alfa Slab One', serif; 
-      font-size: clamp(30px, 8vw, 60px); 
+      font-size: clamp(40px, 9vw, 85px); 
       color: #1a1a1a; 
       line-height: 1.2;
-      letter-spacing: -2px;
+      letter-spacing: -3px;
     }
     .title-badge {
       display: inline-block; padding: 5px 20px; background: #ffffff; border: 5px solid #1a1a1a; border-radius: 15px;
       transform: rotate(-3deg); margin-left: 10px; box-shadow: 6px 6px 0px #f0f0f0;
     }
 
-    /* controls */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; flex: 1; width: 100%; }
     .controls-container {
       max-width: 800px; margin: 20px auto 40px; padding: 30px;
       background: #fff; border: 5px solid #1a1a1a; border-radius: 30px;
@@ -98,14 +88,16 @@
     }
   </style>
 </head>
-<body>
+<body id="mainBody">
 
+<div class="main-wrapper">
   <div class="esc-hint">PRESS [ESC] TO EXIT TRACE MODE</div>
 
   <section class="hero">
     <h1>trace & <span class="title-badge">s***.</span></h1>
   </section>
 
+  <div class="container">
   <div class="controls-container">
     <div class="control-group">
       <label>1. choose image</label>
@@ -139,8 +131,10 @@
       DRAG IMAGE HERE <br> OR USE UPLOAD BUTTON
     </div>
   </div>
+  </div>
+</div>
 
-  <script>
+<script>
     const imgUpload = document.getElementById('imgUpload');
     const traceImg = document.getElementById('traceImg');
     const zoomSlider = document.getElementById('zoomSlider');
@@ -221,5 +215,6 @@
       }
     };
   </script>
+  <script src="main.js"></script>
 </body>
-</html>
+</html><!-- Made with ❤️ from 4SP -->

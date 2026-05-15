@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>creations | things and s***.</title>
+  <meta name="title" content="creations | things and s***.">
+  <meta name="description" content="A gallery of websites and random digital objects.">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=block');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .hero { padding: 80px 80px 20px; text-align: left; } 
+    .container { max-width: 100%; margin: 0; padding: 0 80px; flex: 1; width: 100%; }
+
+    .hero h1 { 
+      font-family: 'Alfa Slab One', serif; 
+      font-size: clamp(30px, 6vw, 65px); 
+      color: #1a1a1a; 
+      line-height: 1.1;
+      letter-spacing: -2px;
+    }
+    .subtitle { font-size: 20px; font-weight: 900; color: #ccc; margin-bottom: 40px; max-width: 600px;}
+
+    /* grid */
+    .item-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px; 
+      margin-bottom: 40px;
+    }
+
+    .card { position: relative; cursor: pointer; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+    .slot-design {
+      background: #ffffff;
+      border: 5px solid #1a1a1a;
+      border-radius: 0; 
+      overflow: hidden; 
+      box-shadow: 10px 10px 0px #f0f0f0;
+      transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover .slot-design { transform: translateY(-20px); box-shadow: 25px 25px 0px #e8e8e8; }
+
+    .slot-visual {
+      aspect-ratio: 16/9; background: #f9f9f9; border-bottom: 5px solid #1a1a1a;
+      display: flex; align-items: center; justify-content: center; position: relative;
+    }
+    .slot-visual img { 
+      width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; 
+      image-rendering: -webkit-optimize-contrast;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+    }
+
+    .slot-content { padding: 30px; flex-shrink: 0; }
+    .slot-title { font-family: 'Alfa Slab One', serif; font-size: 24px; line-height: 1.1; margin-bottom: 8px; }
+    .slot-desc-short { font-size: 14px; color: #666; font-weight: 600; line-height: 1.4; }
+
+    /* footer */
+    .the-end { text-align: center; color: #ccc; font-weight: 800; font-size: 14px; margin-top: 80px; letter-spacing: 2px; }
+
+    @media (max-width: 1000px) {
+      .item-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body id="mainBody">
+
+<div class="main-wrapper">
+  
+  <div class="hero">
+    <h1>creations <span style="color:#ccc">&</span> <span style="text-decoration: underline">s***.</span></h1>
+  </div>
+  <div class="container">
+    <div class="subtitle">A failed attempt at professionalism. Here are the websites I've built that actually work (mostly).</div>
+
+    <div class="item-grid" id="creationsGrid">
+      <!-- Dynamically filled -->
+    </div>
+
+    <div class="the-end">the end.</div>
+  </div>
+
+</div>
+
+<script src="main.js"></script>
+<script src="creations_data.js"></script>
+<script>
+  function renderCreations() {
+    if (!window.creationsData) return;
+    const grid = document.getElementById('creationsGrid');
+    grid.innerHTML = window.creationsData.map(item => `
+      <a href="${item.url}" class="card">
+        <div class="slot-design">
+          <div class="slot-visual">
+            <img src="${item.image}" alt="${item.title}">
+          </div>
+          <div class="slot-content">
+            <div class="slot-title">${item.title}</div>
+            <div class="slot-desc-short">${item.description}</div>
+          </div>
+        </div>
+      </a>
+    `).join('');
+  }
+  renderCreations();
+</script>
+</body>
+</html>
+<!-- Made with ❤️ from 4SP -->

@@ -1,0 +1,32 @@
+window.creationsData = [
+  {
+    "title": "4SP V6",
+    "image": "images/creations/4sp-v6.png",
+    "url": "https://www.4sp-academics.camdvr.org/",
+    "description": "The high-powered ecosystem for restricted networks."
+  },
+  {
+    "title": "Viro",
+    "image": "images/creations/viro.png",
+    "url": "https://www.viro-sports.gleeze.com/",
+    "description": "The sports hub with the Geist typography I used to like."
+  },
+  {
+    "title": "Vellum",
+    "image": "images/creations/vellum.png",
+    "url": "https://www.vellum.gleeze.com/",
+    "description": "Minimalist Bible reader. Very \"intentional.\""
+  },
+  {
+    "title": "things and s***.",
+    "image": "images/creations/t&s.png",
+    "url": "https://things-and-shit.org/",
+    "description": "This website. Meta, I know."
+  },
+  {
+    "title": "9/11 Memorial",
+    "image": "images/creations/september-11.png",
+    "url": "https://september-11th-memorial.vercel.app/memorial.html",
+    "description": "Three.js deep dive into history."
+  }
+];

@@ -4,48 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>things and s***.</title>
-  <meta name="title" content="things and s***.">
+  <title>archive | things and s***.</title>
+  <meta name="title" content="archive | things and s***.">
   <meta name="description" content="An archive of random objects and adrenaline crashes. Explore the physical receipts of lessons learned.">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=block');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body { 
-      font-family: 'Nunito', sans-serif; 
-      background: #ffffff; 
-      color: #1a1a1a; 
-      padding-bottom: 100px;
-      overflow-x: hidden;
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* toasts */
-    #toastContainer {
-      position: fixed; bottom: 24px; right: 24px; z-index: 20000;
-      display: flex; flex-direction: column; gap: 10px; pointer-events: none;
-    }
-    .toast {
-      background: #fff; border: 4px solid #1a1a1a; border-radius: 12px;
-      padding: 15px 25px; font-family: 'Alfa Slab One', serif; font-size: 14px;
-      box-shadow: 6px 6px 0px #1a1a1a;
-      animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    .toast.error { background: #FF0054; color: #fff; box-shadow: 6px 6px 0px #80002a; border-color: #fff;}
-    .toast.success { background: #FFB703; color: #1a1a1a; }
-    
-    @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
-    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
-
     /* hero + sort */
-    .hero { padding: 80px 24px 20px; text-align: center; } 
+    .hero { padding: 80px 40px 20px; text-align: center; } 
     .hero h1 { 
       font-family: 'Alfa Slab One', serif; 
       font-size: clamp(40px, 9vw, 85px); 
@@ -74,7 +45,7 @@
     .sort-tag.active { background: #1a1a1a; color: #fff; transform: rotate(0deg); }
 
     /* grid */
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; flex: 1; width: 100%; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; flex: 1; width: 100%; }
     .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 60px 40px; }
 
     .card { position: relative; cursor: pointer; }
@@ -115,219 +86,52 @@
     }
     .card:hover .tag { transform: rotate(0deg) scale(1.2) translateY(-20px); }
 
-    .tag-frustration { background: #FF0054; color: #ffffff; box-shadow: 4px 4px 0px #80002a; } 
-    .tag-hype        { background: #FFB703; color: #1a1a1a; box-shadow: 4px 4px 0px #b38600; } 
-    .tag-shock       { background: #70D6FF; color: #1a1a1a; box-shadow: 4px 4px 0px #386b80; } 
-    .tag-neutral     { background: #ffffff; color: #1a1a1a; box-shadow: 4px 4px 0px #ccc; }
+    .tag-frustration, .tag-red    { background: #FF0054; color: #ffffff; box-shadow: 4px 4px 0px #80002a; } 
+    .tag-hype, .tag-yellow       { background: #FFB703; color: #1a1a1a; box-shadow: 4px 4px 0px #b38600; } 
+    .tag-shock, .tag-blue        { background: #70D6FF; color: #1a1a1a; box-shadow: 4px 4px 0px #386b80; } 
+    .tag-neutral, .tag-white     { background: #ffffff; color: #1a1a1a; box-shadow: 4px 4px 0px #ccc; }
 
     /* footer */
     .the-end { text-align: center; color: #ccc; font-weight: 800; font-size: 14px; margin-top: 80px; letter-spacing: 2px; }
-    .footer-bar { position: absolute; bottom: 24px; left: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; color: #aaa; font-size: 12px; font-weight: 700; z-index: 10; }
-    .footer-bar a { color: #aaa; text-decoration: none; transition: color 0.2s ease; }
-    .footer-bar a:hover { color: #1a1a1a; }
-
-    /* sidebar */
-    #sidebar {
-      width: 260px; height: 100vh; background: #ffffff; border-left: 5px solid #1a1a1a;
-      position: fixed; right: 0; top: 0; padding: 40px 20px;
-      display: flex; flex-direction: column; z-index: 1000;
-      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    #sidebar.collapsed { transform: translateX(100%); }
-
-    .nav-logo { font-family: 'Alfa Slab One', serif; font-size: 32px; margin-bottom: 50px; text-align: right; color: #1a1a1a; text-decoration: none; }
-    .nav-hitbox { position: relative; margin-bottom: 20px; padding: 15px; cursor: pointer; }
-    .nav-blob { position: absolute; inset: 0; background: #fff; border: 4px solid #1a1a1a; border-radius: 15px; z-index: -1; transform: rotate(2deg); transition: 0.3s; }
-    .nav-hitbox:hover .nav-blob { background: #FFB703; transform: rotate(0deg) scale(1.05); box-shadow: -6px 6px 0px #1a1a1a; }
-    .nav-hitbox.active .nav-blob { background: #1a1a1a; transform: rotate(0deg); }
-    .nav-link { font-family: 'Alfa Slab One', serif; font-size: 16px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; color: inherit; text-decoration: none; }
-    .nav-hitbox.active .nav-link { color: #fff; }
-
-    .control-deck { position: absolute; bottom: 24px; left: -65px; display: flex; gap: 15px; }
-    .deck-btn {
-      width: 50px; height: 50px; background: #fff; border: 5px solid #1a1a1a;
-      border-radius: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 20px; box-shadow: -4px 4px 0px #f0f0f0; transition: 0.3s; color: #1a1a1a; text-decoration: none;
-    }
-    .deck-btn:hover { transform: translateY(-4px); box-shadow: -8px 8px 0px #e8e8e8; }
-
-    /* views */
-    .main-wrapper { 
-      flex: 1; margin-right: 260px; transition: margin-right 0.4s cubic-bezier(0.19, 1, 0.22, 1); 
-      position: relative; min-height: 100vh;
-    }
-    body.sidebar-closed .main-wrapper { margin-right: 0; }
-
-    .view-section { 
-      position: absolute; width: 100%; top: 0; left: 0; 
-      opacity: 0; transform: translateY(20px); pointer-events: none;
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-    .view-section.active { opacity: 1; transform: translateY(0); pointer-events: auto; position: relative; }
 
     /* modals */
     body.animating .tag, body.animating .card { transition: none !important; pointer-events: none !important; }
-    
-    #expansionOverlay, #createOverlay { 
-      position: fixed; z-index: 10000; display: none; 
-      transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
-    }
-    #expansionOverlay.active, #createOverlay.active { 
-      top: 40px !important; left: 40px !important; 
-      width: calc(100vw - 80px) !important; height: calc(100vh - 80px) !important; 
-      pointer-events: auto; 
-    }
-    
-    #modalDetailsView, #createModalView { 
-      z-index: 2; opacity: 0; background: #fff; border-radius: 20px; 
-      border: 5px solid #1a1a1a; overflow: hidden; transition: opacity 0.3s ease; 
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-    }
-    #expansionOverlay.active #modalDetailsView, #createOverlay.active #createModalView { 
-      border-radius: 40px; opacity: 1; pointer-events: auto; box-shadow: 25px 25px 0px #1a1a1a; 
-    }
-    
-    #modalMainContent, #createMainContent { display: flex; flex-direction: row; height: 100%; width: 100%; position: relative; }
+    #expansionOverlay { position: fixed; z-index: 10000; display: none; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+    #expansionOverlay.active { top: 40px !important; left: 40px !important; width: calc(100vw - 80px) !important; height: calc(100vh - 80px) !important; pointer-events: auto; }
+    #modalDetailsView { z-index: 2; opacity: 0; background: #fff; border-radius: 20px; border: 5px solid #1a1a1a; overflow: hidden; transition: opacity 0.3s ease; position: absolute; inset: 0; display: flex; flex-direction: column; }
+    #expansionOverlay.active #modalDetailsView { border-radius: 40px; opacity: 1; pointer-events: auto; box-shadow: 25px 25px 0px #1a1a1a; }
+    #modalMainContent { display: flex; flex-direction: row; height: 100%; width: 100%; position: relative; }
     .visual-expanded-container { position: relative; background: #ffffff; flex: 0 0 50%; border-right: 5px solid #1a1a1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    
-    /* slides */
-    #slides-wrapper, #create-slides-wrapper { position: absolute; inset: 0; z-index: 1; }
+    #slides-wrapper { position: absolute; inset: 0; z-index: 1; }
     .slide { position: absolute; inset: 30px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease; visibility: hidden; }
     .slide.active { opacity: 1; visibility: visible; }
-    
     .texture-slide-inner { width: 100% !important; height: 100% !important; display: flex; align-items: center; justify-content: center; }
-    
     .slide img, .texture-slide-inner { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 30px; border: 5px solid #1a1a1a; background: #f9f9f9; box-shadow: 10px 10px 0px #f0f0f0; }
-
     .btn-hitbox { position: absolute; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
     .slide-btn, .close-x { background: #ffffff; color: #1a1a1a; border: 5px solid #1a1a1a; border-radius: 15px; box-shadow: 4px 4px 0px #f0f0f0; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1); }
     .btn-hitbox:hover .slide-btn, .btn-hitbox:hover .close-x { transform: translateY(-4px); box-shadow: 8px 8px 0px #e8e8e8; }
-    .btn-hitbox:hover .close-x { color: #FF0054; }
-
     .prev-hitbox { left: 10px; top: 50%; transform: translateY(-50%); }
     .next-hitbox { right: 10px; top: 50%; transform: translateY(-50%); }
     .close-hitbox { right: 15px; top: 15px; z-index: 100; }
-
     .modal-expanded-info { padding: 40px; flex: 1; overflow-y: auto; background: #fff; position: relative; display: flex; flex-direction: column;}
     .desc-full { font-size: 18px; color: #1a1a1a; font-weight: 500; line-height: 1.7; margin-top: 10px; }
     #dimmer { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); opacity: 0; pointer-events: none; z-index: 9998; transition: opacity 0.5s ease; }
     #dimmer.visible { opacity: 1; pointer-events: auto; }
 
-    /* board ui */
-    .float-add {
-      position: fixed; bottom: 40px; right: 300px; width: 80px; height: 80px;
-      background: #ffffff; color: #1a1a1a; border: 5px solid #1a1a1a; border-radius: 20px;
-      font-size: 32px; cursor: pointer; z-index: 900; box-shadow: 6px 6px 0px #f0f0f0;
-      transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1); display: flex; align-items: center; justify-content: center;
-    }
-    body.sidebar-closed .float-add { right: 40px; }
-    .float-add:hover { transform: translateY(-6px); box-shadow: 12px 12px 0px #e8e8e8; background: #FFB703; }
-
-    .delete-item { position: absolute; top: -10px; right: -10px; background: #FF0054; color: #fff; border: 3px solid #1a1a1a; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; z-index: 50; }
-    .card:hover .delete-item { opacity: 1; }
-
-    /* create modal */
-    .edit-field { outline: none; transition: background 0.2s, padding 0.2s; border-radius: 12px; padding: 5px; margin-left: -5px; }
-    .edit-field:hover { background: #f0f0f0; }
-    .edit-field:focus { background: #f9f9f9; padding-left: 10px; }
-    .edit-field:empty:before { content: attr(data-placeholder); color: #bbb; pointer-events: none; display: block; }
-    
-    .dashed-edit { border: 4px dashed #ccc; border-radius: 15px; padding: 15px; margin-left: 0; transition: all 0.2s ease; }
-    .dashed-edit:hover { background: #f9f9f9; border-color: #aaa; }
-    .dashed-edit:focus { background: #fff; border-color: #FFB703; border-style: solid; padding-left: 15px; }
-
-    .custom-select {
-      appearance: none; -webkit-appearance: none;
-      background-image: url('data:image/svg+xml;utf8,<svg fill="%231a1a1a" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-      background-repeat: no-repeat; background-position: right 15px center;
-      padding: 12px 50px 12px 20px; border: 4px solid #1a1a1a; border-radius: 15px;
-      font-family: 'Alfa Slab One', serif; font-size: 16px; background-color: #f9f9f9;
-      cursor: pointer; outline: none; transition: all 0.2s ease; color: #1a1a1a; width: fit-content; margin-bottom: 20px;
-    }
-    .custom-select:hover { background-color: #f0f0f0; }
-    .custom-select:focus { background-color: #fff; border-color: #FFB703; }
-
-    /* date picker */
-    input[type="date"].custom-date {
-      border: 4px dashed #ccc; border-radius: 12px; padding: 8px 15px;
-      font-family: 'Nunito', sans-serif; font-weight: 900; color: #1a1a1a;
-      text-transform: uppercase; font-size: 12px; letter-spacing: 2px;
-      outline: none; cursor: pointer; transition: all 0.2s ease;
-      margin-bottom: 15px; width: fit-content; background-color: transparent;
-    }
-    input[type="date"].custom-date:hover { background-color: #f9f9f9; border-color: #aaa; }
-    input[type="date"].custom-date:focus { background-color: #fff; border-color: #FFB703; border-style: solid; }
-
-    .image-controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 20; }
-    
-    .create-modal-tag { position: absolute; bottom: 40px !important; right: 40px !important; z-index: 60; }
-    .tag-ghost { border: 4px dashed #ccc; color: #aaa; background: transparent; cursor: pointer; box-shadow: none; transform: rotate(0deg) !important; }
-    .tag-ghost:hover { border-color: #1a1a1a; color: #1a1a1a; background: #f9f9f9; }
-
-    #tagEditorPop {
-      position: absolute; bottom: 100px; right: 40px; background: #fff; border: 4px solid #1a1a1a; 
-      border-radius: 20px; padding: 25px; box-shadow: 8px 8px 0px #1a1a1a; display: none; z-index: 100; width: 320px;
-    }
-    #tagEditorPop input { width: 100%; border: 4px solid #1a1a1a; padding: 15px; border-radius: 12px; font-family: 'Nunito'; font-size: 16px; font-weight: 800; outline: none; margin-bottom: 15px; }
-    .swatch-row { display: flex; gap: 12px; justify-content: space-between; margin-bottom: 15px; }
-    .swatch { width: 45px; height: 45px; border-radius: 50%; border: 4px solid #1a1a1a; cursor: pointer; transition: 0.2s; }
-    .swatch:hover { transform: scale(1.1); }
-    .s-frust { background: #FF0054; } .s-hype { background: #FFB703; } .s-shock { background: #70D6FF; } .s-neut { background: #ffffff; }
-
-    .save-btn { 
-      background: #1a1a1a; color: #fff; border: 5px solid #1a1a1a; padding: 15px 30px; 
-      border-radius: 15px; font-family: 'Alfa Slab One', serif; font-size: 18px; cursor: pointer; transition: 0.3s;
-      align-self: flex-start; margin-top: auto;
-    }
-    .save-btn:hover { background: #FFB703; color: #1a1a1a; transform: translateY(-4px); box-shadow: 6px 6px 0px #1a1a1a; }
-
-    .placeholder-visual { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ccc; font-family: 'Alfa Slab One'; font-size: 24px; text-align: center; }
-
     @media (max-width: 1000px) {
-      #sidebar { width: 100%; height: 70px; flex-direction: row; bottom: 0; top: auto; border-left: none; border-top: 5px solid #1a1a1a; transform: none !important; padding: 0 10px; justify-content: space-around; align-items: center; }
-      .control-deck, .nav-logo { display: none; }
-      .main-wrapper { margin-right: 0 !important; padding-bottom: 120px; }
-      .nav-hitbox { margin-bottom: 0; }
-      .nav-link span { display: none; }
-      #expansionOverlay.active, #createOverlay.active { top: 12px !important; left: 12px !important; width: calc(100vw - 24px) !important; height: calc(100vh - 24px) !important; }
-      #modalMainContent, #createMainContent { flex-direction: column; }
+      #expansionOverlay.active { top: 12px !important; left: 12px !important; width: calc(100vw - 24px) !important; height: calc(100vh - 24px) !important; }
+      #modalMainContent { flex-direction: column; }
       .visual-expanded-container { flex: 0 0 35%; border-right: none; border-bottom: 4px solid #1a1a1a; }
-      .float-add { right: 20px; bottom: 90px; width: 60px; height: 60px; font-size: 24px; border-radius: 15px; }
-      body.sidebar-closed .float-add { right: 20px; }
-      .create-modal-tag { bottom: 20px !important; right: 20px !important; }
-      #tagEditorPop { bottom: 80px; right: 20px; width: calc(100vw - 40px); }
     }
   </style>
 </head>
 <body id="mainBody">
 
-<div id="toastContainer"></div>
-
-<div id="dimmer" onclick="closeExpanded(); closeCreateModal();"></div>
-
-<nav id="sidebar">
-  <div class="control-deck">
-    <button class="deck-btn" onclick="toggleSidebar()">
-      <i class="fa-solid fa-chevron-right" id="toggleIcon"></i>
-    </button>
-  </div>
-  
-  <a href="#" class="nav-logo">t.a.s.</a>
-  
-  <div class="nav-hitbox active" id="nav-archive" onclick="switchView('archive')">
-    <div class="nav-blob"></div>
-    <div class="nav-link"><span>Archive</span> <i class="fa-solid fa-box-archive"></i></div>
-  </div>
-
-  <div class="nav-hitbox" id="nav-board" onclick="switchView('board')">
-    <div class="nav-blob"></div>
-    <div class="nav-link"><span>My Board</span> <i class="fa-solid fa-chalkboard-user"></i></div>
-  </div>
-</nav>
+<div id="dimmer" onclick="closeExpanded()"></div>
 
 <div class="main-wrapper">
   
-  <section id="view-archive" class="view-section active">
+  <section class="view-section active">
     <div class="hero">
       <h1>things and 
         <div class="title-badge-hitbox">
@@ -348,44 +152,17 @@
     </div>
   </section>
 
-  <section id="view-board" class="view-section">
-    <div class="hero">
-      <h1>my <span style="color:#ccc">board.</span></h1>
-    </div>
-
-    <div class="container">
-      <div class="sort-wrapper">
-        <div class="sort-tag-hitbox" onclick="filterBoard('all', this)"><div class="sort-tag active">all</div></div>
-        <div class="sort-tag-hitbox" onclick="filterBoard('thing', this)"><div class="sort-tag">things</div></div>
-        <div class="sort-tag-hitbox" onclick="filterBoard('s***', this)"><div class="sort-tag">s***</div></div>
-      </div>
-
-      <div class="item-grid" id="boardGrid"></div>
-      <div class="the-end">the end.</div>
-    </div>
-
-    <button class="float-add" id="addBtn" onclick="openCreateModal(this)"><i class="fa-solid fa-plus"></i></button>
-  </section>
-
-  <div class="footer-bar">
-    <div>Made with ❤ from 4SP. &copy; 2026</div>
-    <a href="mailto:hello@things-and-shit.org">hello@things-and-shit.org</a>
-  </div>
-
 </div>
 
 <div id="expansionOverlay">
   <div id="modalSlotReplica" style="position:absolute; inset:0; z-index:1;"></div>
-
   <div id="modalDetailsView">
     <div class="btn-hitbox close-hitbox" onclick="closeExpanded()">
       <div class="close-x"><i class="fa-solid fa-xmark"></i></div>
     </div>
-    
     <div id="modalMainContent">
       <div class="visual-expanded-container">
         <div id="slides-wrapper"></div>
-        
         <div class="btn-hitbox prev-hitbox" onclick="changeSlide(-1)">
           <div class="slide-btn"><i class="fa-solid fa-chevron-left"></i></div>
         </div>
@@ -402,186 +179,34 @@
   </div>
 </div>
 
-<div id="createOverlay">
-  <div id="createModalView">
-    <div class="btn-hitbox close-hitbox" onclick="closeCreateModal()">
-      <div class="close-x"><i class="fa-solid fa-xmark"></i></div>
-    </div>
-    
-    <div id="createMainContent">
-      <div class="visual-expanded-container">
-        <div id="create-slides-wrapper"></div>
-        
-        <div class="btn-hitbox prev-hitbox" id="cPrevBtn" onclick="changeCreateSlide(-1)" style="display:none;">
-          <div class="slide-btn"><i class="fa-solid fa-chevron-left"></i></div>
-        </div>
-        <div class="btn-hitbox next-hitbox" id="cNextBtn" onclick="changeCreateSlide(1)" style="display:none;">
-          <div class="slide-btn"><i class="fa-solid fa-chevron-right"></i></div>
-        </div>
-
-        <div class="image-controls">
-          <button class="deck-btn" id="cCamBtn" onclick="document.getElementById('cFiles').click()"><i class="fa-solid fa-camera"></i></button>
-          <button class="deck-btn" id="cTrashBtn" onclick="deleteCurrentCreateImage()" style="color: #FF0054; display:none;"><i class="fa-solid fa-trash"></i></button>
-        </div>
-        <input type="file" id="cFiles" multiple accept="image/*" style="display:none;" onchange="handleCreateImages(event)">
-      </div>
-
-      <div class="modal-expanded-info" style="padding-bottom: 80px;">
-        <div contenteditable="true" class="slot-title edit-field" id="cTitleEdit" data-placeholder="Title..." style="font-size: 38px;"></div>
-        
-        <input type="date" id="cDateEdit" class="custom-date">
-        
-        <select id="cCatSelect" class="custom-select" onchange="handleCategoryChange()">
-          <option value="thing">It's a thing</option>
-          <option value="s***">It's s***</option>
-        </select>
-
-        <div contenteditable="true" class="desc-full edit-field dashed-edit" id="cShortEdit" data-placeholder="Short description for the card overview..." style="font-size: 14px; font-weight: 700; color: #666; margin-bottom: 15px;"></div>
-        <div contenteditable="true" class="desc-full edit-field dashed-edit" id="cFullEdit" data-placeholder="What happened? Type the full story here..." style="flex: 1; margin-bottom: 25px;"></div>
-        
-        <button class="save-btn" onclick="saveToBoard()">SAVE RECEIPT</button>
-      </div>
-
-      <div class="tag tag-ghost create-modal-tag" id="cTagDisplay" onclick="toggleTagEditor()">+ add tag</div>
-      
-      <div id="tagEditorPop">
-        <input type="text" id="cTagInput" placeholder="Tag text..." maxlength="15" oninput="updateCreateTagPreview()">
-        <div class="swatch-row">
-           <div class="swatch s-frust" onclick="applyCreateTagColor('frustration')"></div>
-           <div class="swatch s-hype" onclick="applyCreateTagColor('hype')"></div>
-           <div class="swatch s-shock" onclick="applyCreateTagColor('shock')"></div>
-           <div class="swatch s-neut" onclick="applyCreateTagColor('neutral')"></div>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-          <button onclick="removeCreateTag()" style="flex:1; background:#FF0054; color:#fff; border:4px solid #1a1a1a; border-radius:12px; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-          <button onclick="toggleTagEditor()" style="flex:3; background:#1a1a1a; color:#fff; border:4px solid #1a1a1a; border-radius:12px; cursor:pointer; font-family:'Alfa Slab One'; font-size:16px;">Done</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
+<script src="main.js"></script>
+<script src="archive_data.js"></script>
 <script>
-  // db
-  let db;
-  let userItems = [];
-
-  function showToast(message, type = 'success') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.animation = 'slideOut 0.3s cubic-bezier(0.19, 1, 0.22, 1) forwards';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
-
-  async function initDB() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('TAS_Database', 1);
-      request.onupgradeneeded = (e) => {
-        const database = e.target.result;
-        if (!database.objectStoreNames.contains('cache_store')) {
-          database.createObjectStore('cache_store', { keyPath: 'id' });
-        }
-      };
-      request.onsuccess = (e) => {
-        db = e.target.result;
-        resolve();
-      };
-      request.onerror = () => {
-        showToast("Database failed to load.", "error");
-        reject();
-      };
-    });
-  }
-
-  async function loadUserItems() {
-    return new Promise((resolve) => {
-      if(!db) resolve();
-      const tx = db.transaction('cache_store', 'readonly');
-      const store = tx.objectStore('cache_store');
-      const request = store.getAll();
-      request.onsuccess = () => {
-        userItems = request.result.sort((a,b) => b.id - a.id); // newest first
-        resolve();
-      };
-    });
-  }
-
-  // boot
-  initDB().then(() => loadUserItems()).then(() => {
-    renderArchiveGrid();
-    renderBoardGrid();
-  });
-
-  // sidebar toggle
-  function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    const body = document.body;
-    const icon = document.getElementById('toggleIcon');
-    
-    sb.classList.toggle('collapsed');
-    body.classList.toggle('sidebar-closed');
-    icon.className = sb.classList.contains('collapsed') ? 'fa-solid fa-chevron-left' : 'fa-solid fa-chevron-right';
-  }
-
-  // view switch
-  function switchView(view) {
-    document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('view-' + view).classList.add('active');
-
-    document.querySelectorAll('.nav-hitbox').forEach(n => n.classList.remove('active'));
-    document.getElementById('nav-' + view).classList.add('active');
-    
-    if(view === 'board') renderBoardGrid();
-  }
-
-  // data
-  const archiveData = [
-    {
-      id: 1, category: "thing", title: "the nelson rock", date: "March 15th, 2026",
-      tag: "Aw s***.", shortDesc: "a little rock to remind of big rock",
-      fullDesc: "I was walking across a massive rock that was packed with embedded pebbles. I honestly thought those pebbles would act like grip tape for my shoes, but they did the exact opposite, it was like stepping on ball bearings. I went down hard. I was wearing a jacket, which luckily kept the open wounds from getting immediate dirt or infection, but it still shredded my arms. The crazy part is it didn't even hurt that much at first, but the second I stood up and tried to walk away, the adrenaline wore off FAST. Suddenly every scrape and grit-burn hit me all at once. This rock is the reminder of that day.",
-      images: ['images/nelsons_rock/rock-1.jpeg', 'images/nelsons_rock/rock-2.jpeg', 'images/nelsons_rock/rock-3.jpeg', 'images/nelsons_rock/heal-1.jpeg', 'images/nelsons_rock/heal-2.jpeg', 'images/nelsons_rock/heal-3.jpeg']
-    },
-    {
-      id: 2, category: "s***", title: "s*** placeholder", date: "ongoing",
-      tag: "F*** yeah!", shortDesc: "for the memories that don't have a shape.",
-      fullDesc: "A placeholder for the entries that exist in thought but haven't taken physical form. This slot represents the abstract side of the archive.",
-      images: ["texture"]
-    },
-    {
-      id: 3, category: "thing", title: "placeholder", date: "none",
-      tag: "Whoa.", shortDesc: "placeholder shortdesc.",
-      fullDesc: "placeholder or smth",
-      images: ["https://placehold.co/600x400/fff/1a1a1a?text=Placeholder"]
-    }
-  ];
-
   // rendering
-  function getCardHTML(item, isUser = false) {
-    let tagClass = 'tag-neutral';
+  function getCardHTML(item) {
+    let tagClass = 'tag-white';
     if(item.tagColor) {
-      tagClass = `tag-${item.tagColor}`;
+      const colorMap = {
+        'red': 'tag-red',
+        'yellow': 'tag-yellow',
+        'blue': 'tag-blue',
+        'white': 'tag-white',
+        'frustration': 'tag-red',
+        'hype': 'tag-yellow',
+        'shock': 'tag-blue',
+        'neutral': 'tag-white'
+      };
+      tagClass = colorMap[item.tagColor.toLowerCase()] || 'tag-white';
     } else if(item.tag) {
       const lowTag = item.tag.toLowerCase();
-      tagClass = lowTag.includes('s***') ? 'tag-frustration' : (lowTag.includes('f***') || lowTag.includes('yeah') ? 'tag-hype' : (lowTag.includes('whoa') ? 'tag-shock' : 'tag-neutral'));
+      tagClass = lowTag.includes('s***') ? 'tag-red' : (lowTag.includes('f***') || lowTag.includes('yeah') ? 'tag-yellow' : (lowTag.includes('whoa') ? 'tag-blue' : 'tag-white'));
     }
-    
     const visualHTML = item.images[0] === 'texture' 
       ? '<div class="slot-visual" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;"><div class="shit-icon" style="font-family:\'Alfa Slab One\'; color:#ddd; font-size:60px;">s***</div></div>'
       : `<div class="slot-visual"><img src="${item.images[0]}"></div>`;
-    
     const safeItem = JSON.stringify(item).replace(/"/g, '&quot;');
-
     return `
       <div class="card" onclick="openExpanded(this, ${safeItem})">
-        ${isUser ? `<div class="delete-item" onclick="event.stopPropagation(); deleteItem(${item.id})"><i class="fa-solid fa-xmark"></i></div>` : ''}
         <div class="slot-design">
           ${visualHTML}
           <div class="slot-content">
@@ -602,275 +227,12 @@
 
   function renderArchiveGrid(cat = 'all') {
     const grid = document.getElementById('mainGrid');
-    const filtered = cat === 'all' ? archiveData : archiveData.filter(i => i.category === cat);
+    if (!window.archiveData) return;
+    const filtered = cat === 'all' ? window.archiveData : window.archiveData.filter(i => i.category === cat);
     grid.innerHTML = filtered.map(item => getCardHTML(item)).join('');
   }
 
-  function filterBoard(cat, hit) {
-    hit.parentElement.querySelectorAll('.sort-tag').forEach(t => t.classList.remove('active'));
-    hit.querySelector('.sort-tag').classList.add('active');
-    renderBoardGrid(cat);
-  }
-
-  function renderBoardGrid(cat = 'all') {
-    const grid = document.getElementById('boardGrid');
-    const filtered = cat === 'all' ? userItems : userItems.filter(i => i.category === cat);
-    if(filtered.length === 0) { grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#ccc; font-weight:900;">BOARD EMPTY.</p>`; return; }
-    grid.innerHTML = filtered.map(item => getCardHTML(item, true)).join('');
-  }
-
-  // create logic
-  let originBtn = null;
-  let createImages = [];
-  let currentCreateSlideIdx = 0;
-  let currentCreateTagColor = 'neutral';
-  let hasCustomTag = false;
-
-  function openCreateModal(btn) {
-    originBtn = btn;
-    const overlay = document.getElementById('createOverlay');
-    const rect = btn.getBoundingClientRect();
-
-    createImages = [];
-    currentCreateSlideIdx = 0;
-    hasCustomTag = false;
-    currentCreateTagColor = 'neutral';
-    
-    document.getElementById('cTitleEdit').innerText = '';
-    document.getElementById('cDateEdit').value = '';
-    document.getElementById('cShortEdit').innerText = '';
-    document.getElementById('cFullEdit').innerText = '';
-    document.getElementById('cCatSelect').value = 'thing';
-    document.getElementById('cFiles').value = '';
-    
-    const tagDisplay = document.getElementById('cTagDisplay');
-    tagDisplay.innerText = '+ add tag';
-    tagDisplay.className = 'tag tag-ghost create-modal-tag';
-    document.getElementById('cTagInput').value = '';
-    document.getElementById('tagEditorPop').style.display = 'none';
-
-    renderCreateVisuals();
-
-    overlay.style.transition = 'none';
-    overlay.style.display = 'block';
-    overlay.style.top = rect.top + 'px';
-    overlay.style.left = rect.left + 'px';
-    overlay.style.width = rect.width + 'px';
-    overlay.style.height = rect.height + 'px';
-    
-    btn.style.visibility = 'hidden';
-
-    void overlay.offsetWidth;
-
-    requestAnimationFrame(() => {
-      document.getElementById('dimmer').classList.add('visible');
-      overlay.style.transition = 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
-      overlay.classList.add('active');
-    });
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeCreateModal() {
-    if(!originBtn) return;
-    const overlay = document.getElementById('createOverlay');
-    const rect = originBtn.getBoundingClientRect();
-
-    document.getElementById('dimmer').classList.remove('visible');
-    document.getElementById('tagEditorPop').style.display = 'none';
-    overlay.classList.remove('active');
-    
-    overlay.style.top = rect.top + 'px';
-    overlay.style.left = rect.left + 'px';
-    overlay.style.width = rect.width + 'px';
-    overlay.style.height = rect.height + 'px';
-
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      originBtn.style.visibility = 'visible';
-      originBtn = null;
-      document.body.style.overflow = 'auto';
-    }, 500);
-  }
-
-  function handleCategoryChange() {
-    renderCreateVisuals();
-  }
-
-  async function handleCreateImages(event) {
-    const files = event.target.files;
-    const slotsLeft = 10 - createImages.length;
-    for (let i = 0; i < Math.min(files.length, slotsLeft); i++) {
-      createImages.push(await toBase64(files[i]));
-    }
-    currentCreateSlideIdx = createImages.length - 1; 
-    renderCreateVisuals();
-  }
-
-  function deleteCurrentCreateImage() {
-    if(createImages.length === 0) return;
-    createImages.splice(currentCreateSlideIdx, 1);
-    if(currentCreateSlideIdx >= createImages.length) currentCreateSlideIdx = Math.max(0, createImages.length - 1);
-    renderCreateVisuals();
-  }
-
-  function changeCreateSlide(n) {
-    if (createImages.length <= 1) return;
-    currentCreateSlideIdx = (currentCreateSlideIdx + n + createImages.length) % createImages.length;
-    renderCreateVisuals();
-  }
-
-  function renderCreateVisuals() {
-    const wrapper = document.getElementById('create-slides-wrapper');
-    const prevBtn = document.getElementById('cPrevBtn');
-    const nextBtn = document.getElementById('cNextBtn');
-    const trashBtn = document.getElementById('cTrashBtn');
-    const camBtn = document.getElementById('cCamBtn');
-    const isShit = document.getElementById('cCatSelect').value === 's***';
-
-    if (isShit) {
-      camBtn.style.display = 'none';
-      trashBtn.style.display = 'none';
-      prevBtn.style.display = 'none';
-      nextBtn.style.display = 'none';
-      wrapper.innerHTML = `
-        <div class="slide active">
-          <div class="texture-slide-inner" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;">
-            <div style="font-family:'Alfa Slab One'; color:#bbb; font-size:60px;">s***</div>
-          </div>
-        </div>`;
-    } else {
-      camBtn.style.display = 'flex';
-      if (createImages.length === 0) {
-        wrapper.innerHTML = `<div class="placeholder-visual"><i class="fa-solid fa-image" style="font-size: 60px; margin-bottom: 20px;"></i>Upload Image<br><span style="font-size:14px; font-family:'Nunito';">(Up to 10)</span></div>`;
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-        trashBtn.style.display = 'none';
-      } else {
-        wrapper.innerHTML = createImages.map((src, i) => `
-          <div class="slide ${i === currentCreateSlideIdx ? 'active' : ''}">
-            <img src="${src}">
-          </div>`).join('');
-        
-        prevBtn.style.display = createImages.length > 1 ? 'flex' : 'none';
-        nextBtn.style.display = createImages.length > 1 ? 'flex' : 'none';
-        trashBtn.style.display = 'flex';
-      }
-    }
-  }
-
-  function toggleTagEditor() {
-    const pop = document.getElementById('tagEditorPop');
-    pop.style.display = pop.style.display === 'block' ? 'none' : 'block';
-    if(pop.style.display === 'block') document.getElementById('cTagInput').focus();
-  }
-
-  function updateCreateTagPreview() {
-    const txt = document.getElementById('cTagInput').value;
-    const tagDisplay = document.getElementById('cTagDisplay');
-    if(txt.trim() === '') {
-      hasCustomTag = false;
-      tagDisplay.innerText = '+ add tag';
-      tagDisplay.className = 'tag tag-ghost create-modal-tag';
-    } else {
-      hasCustomTag = true;
-      tagDisplay.innerText = txt;
-      tagDisplay.className = `tag tag-${currentCreateTagColor} create-modal-tag`;
-    }
-  }
-
-  function applyCreateTagColor(colorName) {
-    currentCreateTagColor = colorName;
-    if(!hasCustomTag) {
-      document.getElementById('cTagInput').value = 'Tag';
-      updateCreateTagPreview();
-    } else {
-      document.getElementById('cTagDisplay').className = `tag tag-${colorName} create-modal-tag`;
-    }
-  }
-
-  function removeCreateTag() {
-    hasCustomTag = false;
-    currentCreateTagColor = 'neutral';
-    document.getElementById('cTagInput').value = '';
-    const tagDisplay = document.getElementById('cTagDisplay');
-    tagDisplay.innerText = '+ add tag';
-    tagDisplay.className = 'tag tag-ghost create-modal-tag';
-    toggleTagEditor();
-  }
-
-  // save logic
-  function saveToBoard() {
-    const cat = document.getElementById('cCatSelect').value;
-    
-    if (cat === 'thing' && createImages.length === 0) {
-      showToast("A 'thing' requires a photo. Upload an image.", "error");
-      return;
-    }
-
-    const titleText = document.getElementById('cTitleEdit').innerText.trim();
-    const shortText = document.getElementById('cShortEdit').innerText.trim();
-    const fullText = document.getElementById('cFullEdit').innerText.trim();
-    const tagText = document.getElementById('cTagInput').value.trim();
-    
-    let dateText = "Unknown Date";
-    const dateVal = document.getElementById('cDateEdit').value;
-    if(dateVal) {
-      const d = new Date(dateVal + 'T00:00:00');
-      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const day = d.getDate();
-      const ordinal = (day > 3 && day < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
-      dateText = `${months[d.getMonth()]} ${day}${ordinal}, ${d.getFullYear()}`;
-    }
-
-    const newItem = {
-      id: Date.now(),
-      category: cat,
-      title: titleText || 'Untitled',
-      shortDesc: shortText || 'No description.',
-      fullDesc: fullText || 'No story provided.',
-      date: dateText,
-      images: (cat === 's***') ? ['texture'] : [...createImages]
-    };
-
-    if(hasCustomTag && tagText) {
-      newItem.tag = tagText;
-      newItem.tagColor = currentCreateTagColor;
-    }
-
-    const tx = db.transaction('cache_store', 'readwrite');
-    const store = tx.objectStore('cache_store');
-    store.add(newItem);
-
-    tx.oncomplete = () => {
-      userItems.unshift(newItem);
-      closeCreateModal();
-      renderBoardGrid();
-      showToast("Receipt saved to cache.", "success");
-    };
-
-    tx.onerror = () => {
-      showToast("Failed to save. Storage full.", "error");
-    };
-  }
-
-  const toBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-  });
-
-  function deleteItem(id) {
-    const tx = db.transaction('cache_store', 'readwrite');
-    const store = tx.objectStore('cache_store');
-    store.delete(id);
-
-    tx.oncomplete = () => {
-      userItems = userItems.filter(i => i.id !== id);
-      renderBoardGrid();
-      showToast("Receipt destroyed.", "success");
-    };
-  }
+  renderArchiveGrid();
 
   // expansion modal
   let originCard = null;
@@ -882,23 +244,18 @@
     const overlay = document.getElementById('expansionOverlay');
     const wrapper = document.getElementById('slides-wrapper');
     const rect = card.querySelector('.slot-design').getBoundingClientRect();
-
     document.getElementById('eTitle').textContent = item.title;
     document.getElementById('eDate').textContent = item.date;
     document.getElementById('eText').textContent = item.fullDesc;
-
     const navButtons = document.querySelectorAll('#expansionOverlay .prev-hitbox, #expansionOverlay .next-hitbox');
     navButtons.forEach(btn => btn.style.display = item.images.length > 1 ? 'flex' : 'none');
-
     const replica = document.getElementById('modalSlotReplica');
     replica.innerHTML = '';
     const cloned = card.querySelector('.slot-design').cloneNode(true);
     cloned.style.transform = 'none';
     cloned.style.width = '100%'; cloned.style.height = '100%';
     replica.appendChild(cloned);
-
     if(card.querySelector('.tag')) overlay.appendChild(card.querySelector('.tag').cloneNode(true)); 
-
     wrapper.innerHTML = '';
     viewSlideIndex = 0;
     item.images.forEach((src, i) => {
@@ -907,7 +264,6 @@
       s.innerHTML = src === 'texture' ? '<div class="texture-slide-inner" style="background-image:repeating-linear-gradient(45deg, #ccc, #ccc 1px, transparent 1px, transparent 15px); background-size:20px 20px;"><div style="font-family:\'Alfa Slab One\'; color:#bbb; font-size:60px;">s***</div></div>' : `<img src="${src}">`;
       wrapper.appendChild(s);
     });
-
     overlay.style.transition = 'none';
     overlay.style.display = 'block';
     overlay.style.top = rect.top + 'px';
@@ -915,9 +271,7 @@
     overlay.style.width = rect.width + 'px';
     overlay.style.height = rect.height + 'px';
     card.style.visibility = 'hidden';
-
     void overlay.offsetWidth;
-
     requestAnimationFrame(() => {
       document.getElementById('dimmer').classList.add('visible');
       overlay.style.transition = 'all 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
@@ -930,14 +284,12 @@
     if(!originCard) return;
     const overlay = document.getElementById('expansionOverlay');
     const rect = originCard.querySelector('.slot-design').getBoundingClientRect();
-    
     document.getElementById('dimmer').classList.remove('visible');
     overlay.classList.remove('active');
     overlay.style.top = rect.top + 'px';
     overlay.style.left = rect.left + 'px';
     overlay.style.width = rect.width + 'px';
     overlay.style.height = rect.height + 'px';
-
     setTimeout(() => {
       overlay.style.display = 'none';
       originCard.style.visibility = 'visible';
