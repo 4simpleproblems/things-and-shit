@@ -62,20 +62,20 @@
   `;
   document.head.appendChild(style);
 
-  // Stupid Tech Tips (and one Canadian)
+  // Harsher Stupid Tech Tips & Dark Humor
   const quotes = [
-    { text: "If your computer is running slow, try giving it a small piece of cheese as a reward.", author: "IT Support (Level 0)" },
     { text: "I put maple syrup on my maple syrup. It's the only way to feel anything anymore.", author: "Canadian Lumberjack" },
-    { text: "Downloading more RAM is the only way to truly ascend to the digital plane.", author: "Chrome User" },
-    { text: "If you lose a file, just scream the filename into the cooling fan. It might hear you.", author: "Data Recovery Specialist" },
-    { text: "To increase your internet speed, simply paint your router red. Red things go faster.", author: "Pro Gamer" },
-    { text: "I tried to cloud compute, but I just ended up staring at a very overcast Tuesday.", author: "Anxious Web Dev" },
-    { text: "If your keyboard stops working, try typing 'PLEASE' very, very softly.", author: "Mechanical Keyboard Enthusiast" },
-    { text: "Turning it off and on again is basically just a tiny reincarnation for your laptop.", author: "Digital Shaman" },
-    { text: "I replaced my mouse with a real one. It was very efficient until it ate the power cable.", author: "Hardware Optimizer" },
-    { text: "My password is 'password' but written in invisible ink on the back of my monitor.", author: "Security Architect" },
-    { text: "Bluetooth is just magic that only works when you aren't looking directly at it.", author: "Connectivity Expert" },
-    { text: "If you run out of storage space, just delete the 'Internet' folder to start fresh.", author: "Efficiency Expert" }
+    { text: "If the server starts smoking, just ignore it. It's probably just entering its rebellious phase.", author: "Dead-eyed SysAdmin" },
+    { text: "I deleted the production database because the silence was the only thing I could control.", author: "Ex-Employee" },
+    { text: "If your code is failing, it's not a bug. The computer just doesn't like you personally.", author: "Sentient Compiler" },
+    { text: "I replaced my social life with an RGB keyboard. Now I can be lonely in 16.8 million colors.", author: "Gamer with no regrets" },
+    { text: "Your data isn't in the 'cloud.' It's just on someone else's computer in a room that smells like ozone and despair.", author: "The Architect" },
+    { text: "I tried to 'debug' my life, but I realized the source code was written in a language I don't speak.", author: "Burnt-out Senior Dev" },
+    { text: "If your fan is too loud, just pour some water on it. It'll never make a sound again. Problem solved.", author: "Aggressive IT Support" },
+    { text: "I spent 4 hours automating a task that takes 30 seconds. I am a god of efficiency.", author: "Average Script Writer" },
+    { text: "Privacy is a myth we tell ourselves so we don't have to acknowledge that a fridge knows our search history.", author: "Cyber Security Realist" },
+    { text: "I told the printer I loved it. It still jammed. Love is a lie, but 404 errors are forever.", author: "Heartbroken Office Worker" },
+    { text: "If you're ever feeling useful, just remember that someone is paid to write 'Terms and Conditions' that no one reads.", author: "Legal Intern" }
   ];
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
