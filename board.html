@@ -366,6 +366,7 @@
   function changeSlide(n) { const slides = document.querySelectorAll('#expansionOverlay .slide'); if (slides.length <= 1) return; slides[viewSlideIndex].classList.remove('active'); viewSlideIndex = (viewSlideIndex + n + slides.length) % slides.length; slides[viewSlideIndex].classList.add('active'); }
 </script>
 
+<script src="loader.js"></script>
 </body>
 </html>
 <!-- Made with ❤️ from 4SP -->
