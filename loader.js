@@ -65,7 +65,7 @@
   // Harsher Stupid Tech Tips & Dark Humor
   const quotes = [
     { text: "I put maple syrup on my maple syrup. It's the only way to feel anything anymore.", author: "Canadian Lumberjack" },
-    { text: "If the server starts smoking, just ignore it. It's probably just entering its rebellious phase.", author: "Dead-eyed SysAdmin" },
+    { text: "If the server starts smoking, just ignore it. It's probably just entering puberty.", author: "Dead-eyed SysAdmin" },
     { text: "I deleted the production database because the silence was the only thing I could control.", author: "Ex-Employee" },
     { text: "If your code is failing, it's not a bug. The computer just doesn't like you personally.", author: "Sentient Compiler" },
     { text: "I replaced my social life with an RGB keyboard. Now I can be lonely in 16.8 million colors.", author: "Gamer with no regrets" },
