@@ -62,18 +62,20 @@
   `;
   document.head.appendChild(style);
 
-  // Satirical British stereotype quotes
+  // Satirical global stereotype quotes
   const quotes = [
     { text: "I've had four cups of tea today and I still haven't reached peak politeness.", author: "A very hydrated Londoner" },
-    { text: "It's slightly drizzling, which means it's a perfect day for a 12-mile hike in shorts.", author: "Proper Northern Dad" },
+    { text: "I ordered a 'small' soda and they handed me a gallon bucket. God bless the USA.", author: "Tourist in Texas" },
+    { text: "I'm 5 minutes early, which in my culture means I'm 10 minutes late.", author: "Stressed German Engineer" },
+    { text: "The baguette wasn't crunchy enough, so I've decided to go on strike for the afternoon.", author: "French Revolutionary" },
     { text: "I apologized to a lamp post after walking into it. It didn't apologize back. RUDE.", author: "Polite Citizen" },
-    { text: "The queue is 40 people long. This is the most exciting thing that's happened all week.", author: "Professional Queuer" },
-    { text: "Beans on toast is a culinary masterpiece and I will not hear otherwise.", author: "Student from Birmingham" },
-    { text: "I've misplaced my umbrella, so I guess I live under this bus stop now.", author: "Damp Commuter" },
-    { text: "Is it 'scone' or 'scone'? Either way, the jam goes on first. Or is it the cream?", author: "Person having a crisis" },
-    { text: "I said 'right then' and stood up, but I've been standing here for 10 minutes because I can't actually leave.", author: "Awkward Guest" },
+    { text: "I put maple syrup on my maple syrup. It's the only way to feel anything anymore.", author: "Canadian Lumberjack" },
     { text: "It's 18 degrees Celsius. Summer is here. Fetch the sun cream and the emergency fan.", author: "Optimistic Southerner" },
-    { text: "I’m not angry, I’m just 'a bit disappointed,' which is actually much worse.", author: "Every British Mum" }
+    { text: "I told my mum I wasn't hungry, and she took it as a personal declaration of war.", author: "Every Italian Son" },
+    { text: "The queue is 40 people long. This is the most exciting thing that's happened all week.", author: "Professional Queuer" },
+    { text: "I survived a 100mph sandstorm just to get a specific brand of hummus.", author: "Dubai Local" },
+    { text: "I saw a spider the size of a dinner plate and just invited him for dinner. He's my roommate now.", author: "Average Australian" },
+    { text: "I spent $200 on a 'minimalist' wallet that holds exactly two cards and no hope.", author: "Silicon Valley Tech Bro" }
   ];
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
