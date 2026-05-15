@@ -42,7 +42,7 @@
       height: 100%;
       width: 0%;
       background: #FFB703;
-      transition: width 0.3s ease;
+      transition: width 1.2s ease-in-out;
     }
     .loader-quote {
       font-weight: 800;
@@ -62,18 +62,18 @@
   `;
   document.head.appendChild(style);
 
-  // Random quotes by completely random people
+  // Satirical British stereotype quotes
   const quotes = [
-    { text: "I once ate a whole lemon just to see what would happen. Nothing happened.", author: "Gary from the bus stop" },
-    { text: "If you walk backwards long enough, you eventually end up where you started, but tired.", author: "A guy named Kevin" },
-    { text: "My microwave makes a noise like a dying seagull, but it still heats the soup.", author: "Brenda, 2nd floor" },
-    { text: "Sometimes I forget why I walked into a room, so I just stand there to assert dominance.", author: "Local Skater" },
-    { text: "The sky isn't actually blue, it's just reflecting my mood on a good Tuesday.", author: "A very confused toddler" },
-    { text: "I found a dollar in a dryer once. It was the peak of my financial career.", author: "Dave (unemployed)" },
-    { text: "If cats could talk, they wouldn't. They'd just judge your outfit in silence.", author: "The lady with 12 cats" },
-    { text: "I've never been to space, but I did fall off a very tall ladder once. Same vibe.", author: "My Uncle Terry" },
-    { text: "Coffee is just bean water that makes the heart go fast. I love bean water.", author: "Barista at the airport" },
-    { text: "I thought I saw a ghost, but it was just my own reflection in a very clean window.", author: "Anxious Greg" }
+    { text: "I've had four cups of tea today and I still haven't reached peak politeness.", author: "A very hydrated Londoner" },
+    { text: "It's slightly drizzling, which means it's a perfect day for a 12-mile hike in shorts.", author: "Proper Northern Dad" },
+    { text: "I apologized to a lamp post after walking into it. It didn't apologize back. RUDE.", author: "Polite Citizen" },
+    { text: "The queue is 40 people long. This is the most exciting thing that's happened all week.", author: "Professional Queuer" },
+    { text: "Beans on toast is a culinary masterpiece and I will not hear otherwise.", author: "Student from Birmingham" },
+    { text: "I've misplaced my umbrella, so I guess I live under this bus stop now.", author: "Damp Commuter" },
+    { text: "Is it 'scone' or 'scone'? Either way, the jam goes on first. Or is it the cream?", author: "Person having a crisis" },
+    { text: "I said 'right then' and stood up, but I've been standing here for 10 minutes because I can't actually leave.", author: "Awkward Guest" },
+    { text: "It's 18 degrees Celsius. Summer is here. Fetch the sun cream and the emergency fan.", author: "Optimistic Southerner" },
+    { text: "I’m not angry, I’m just 'a bit disappointed,' which is actually much worse.", author: "Every British Mum" }
   ];
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -93,7 +93,10 @@
   `;
   document.body.insertAdjacentHTML('afterbegin', loaderHTML);
 
-  // Asset Loading Logic
+  // Asset Loading Logic with Minimum Time (so they can read the quote)
+  const startTime = Date.now();
+  const minDisplayTime = 3800; // 3.8 seconds minimum
+  
   const assets = [
     ...Array.from(document.querySelectorAll('img')).map(img => img.src),
     ...Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link => link.href)
@@ -106,10 +109,14 @@
   function updateProgress() {
     loadedCount++;
     const progress = (loadedCount / totalAssets) * 100;
+    
+    // Smooth progress even if it loads fast
     if (progressElement) progressElement.style.width = progress + '%';
     
     if (loadedCount >= totalAssets) {
-      setTimeout(hideLoader, 500);
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, minDisplayTime - elapsedTime);
+      setTimeout(hideLoader, remainingTime);
     }
   }
 
