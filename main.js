@@ -9,7 +9,7 @@
       <a href="index.html" class="nav-logo">t.a.s.</a>
       <a href="index.html" class="nav-hitbox">
         <div class="nav-blob"></div>
-        <div class="nav-link"><i class="fa-solid fa-box-archive"></i> <span>Archive</span></div>
+        <div class="nav-link"><i class="fa-solid fa-house"></i> <span>Home</span></div>
       </a>
       <a href="board.html" class="nav-hitbox">
         <div class="nav-blob"></div>
