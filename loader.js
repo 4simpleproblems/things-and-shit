@@ -23,7 +23,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 4px 4px 0px #1a1a1a;
       animation: spin-and-pulse 1.5s infinite cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
     .spinner i {
