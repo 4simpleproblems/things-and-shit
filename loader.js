@@ -4,7 +4,7 @@
   style.textContent = `
     #loader-container {
       position: fixed;
-      bottom: 24px;
+      top: 24px;
       right: 24px;
       z-index: 100000;
       pointer-events: none;
