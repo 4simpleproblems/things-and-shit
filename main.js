@@ -37,6 +37,7 @@
   const footerHTML = `
     <div class="footer-bar">
       <div>Made with ❤ from 4SP. &copy; 2026</div>
+      <a href="terms.html">Terms & Privacy</a>
       <a href="mailto:hello@things-and-shit.org">hello@things-and-shit.org</a>
     </div>
   `;
@@ -175,4 +176,3 @@
     }
   };
 })();
-// Made with ❤️ from 4SP
