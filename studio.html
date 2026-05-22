@@ -327,6 +327,7 @@
         <select id="modalLayout" class="select-box" onchange="studio.toggleModalFields()">
           <option value="center">Center</option>
           <option value="intro-alignable">Intro, Alignable</option>
+          <option value="end">End Screen</option>
         </select>
 
         <div id="alignableFields" style="display:none;">
@@ -340,6 +341,32 @@
             <option value="bl">Bottom Left</option>
             <option value="br">Bottom Right</option>
           </select>
+        </div>
+
+        <div id="endFields" style="display:none;">
+          <label>Links / Socials (Alignable)</label>
+          <textarea id="modalLinksText" class="input-box" rows="2" placeholder="youtube.com/4simpleproblems"></textarea>
+          
+          <label>Links Alignment</label>
+          <select id="modalLinksAlign" class="select-box">
+            <option value="tl">Top Left</option>
+            <option value="tr">Top Right</option>
+            <option value="bl">Bottom Left</option>
+            <option value="br">Bottom Right</option>
+          </select>
+
+          <div class="grid-2">
+            <div>
+              <label>Badge Angle</label>
+              <input type="number" id="modalBadgeAngle" class="input-box" value="-4">
+            </div>
+            <div>
+              <label>Border Thk</label>
+              <input type="number" id="modalBadgeBorder" class="input-box" value="5">
+            </div>
+          </div>
+          <label>Badge Roundness</label>
+          <input type="range" id="modalBadgeRound" class="slider" min="0" max="100" value="15" style="margin-bottom:20px; width: 100%;">
         </div>
       </div>
 
@@ -383,7 +410,7 @@
           </div>
           <div>
             <label>BG Opacity</label>
-            <input type="range" id="modalOverlayOpacity" class="slider" min="0" max="1" step="0.1" value="0.4">
+            <input type="range" id="modalOverlayOpacity" class="slider" min="0" max="1" step="0.1" value="0.4" style="width: 100%;">
           </div>
         </div>
       </div>
@@ -469,6 +496,11 @@
           alignment: 'tl',
           mainText: 'NEW SLIDE',
           descText: '',
+          linksText: '',
+          linksAlign: 'bl',
+          badgeAngle: -4,
+          badgeBorder: 5,
+          badgeRound: 15,
           fitting: 'floating',
           outline: 'on',
           overlayText: '',
@@ -533,7 +565,6 @@
           return;
         }
         
-        // Find which slide index is currently active based on currentTime
         let activeIdx = -1;
         let elapsed = 0;
         for(let i=0; i<this.slides.length; i++) {
@@ -583,6 +614,11 @@
           document.getElementById('imageOnlyFields').style.display = 'none';
           document.getElementById('modalMainText').value = s.mainText;
           document.getElementById('modalDescText').value = s.descText;
+          document.getElementById('modalLinksText').value = s.linksText || '';
+          document.getElementById('modalLinksAlign').value = s.linksAlign || 'bl';
+          document.getElementById('modalBadgeAngle').value = s.badgeAngle || -4;
+          document.getElementById('modalBadgeBorder').value = s.badgeBorder || 5;
+          document.getElementById('modalBadgeRound').value = s.badgeRound || 15;
           document.getElementById('modalLayout').value = s.layout;
           document.getElementById('modalAlign').value = s.alignment;
           this.toggleModalFields();
@@ -606,6 +642,11 @@
         if (s.type === 'text') {
           s.mainText = document.getElementById('modalMainText').value;
           s.descText = document.getElementById('modalDescText').value;
+          s.linksText = document.getElementById('modalLinksText').value;
+          s.linksAlign = document.getElementById('modalLinksAlign').value;
+          s.badgeAngle = parseFloat(document.getElementById('modalBadgeAngle').value);
+          s.badgeBorder = parseFloat(document.getElementById('modalBadgeBorder').value);
+          s.badgeRound = parseInt(document.getElementById('modalBadgeRound').value);
           s.layout = document.getElementById('modalLayout').value;
           s.alignment = document.getElementById('modalAlign').value;
         } else {
@@ -620,6 +661,118 @@
         this.updateSlideList();
         this.drawAtTime(this.currentTime);
         this.closeModal();
+      }
+
+      wrapText(text, maxWidth, baseSize) {
+        if (!text) return [];
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = this.ctx.measureText(currentLine + " " + word).width;
+          if (width < maxWidth) currentLine += " " + word;
+          else { lines.push(currentLine); currentLine = word; }
+        }
+        lines.push(currentLine);
+        return lines;
+      }
+
+      drawTextContent(slide, ox, oy) {
+        this.ctx.save();
+        this.ctx.translate(ox, oy);
+
+        if (slide.layout === 'center') {
+          this.ctx.fillStyle = '#1a1a1a';
+          let baseSize = 200;
+          const maxWidth = this.res.w * 0.8;
+          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          if (lines.length > 4) { baseSize = 120; lines = this.wrapText(slide.mainText, maxWidth, baseSize); }
+          if (lines.length > 8) { baseSize = 80; lines = this.wrapText(slide.mainText, maxWidth, baseSize); }
+          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          const totalH = lines.length * baseSize;
+          lines.forEach((line, i) => {
+            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
+            this.ctx.fillText(line, this.res.w / 2, y);
+          });
+        } else if (slide.layout === 'intro-alignable') {
+          this.ctx.fillStyle = '#1a1a1a';
+          const titleSize = 100;
+          const descSize = 45;
+          const padding = 100;
+          const spacing = 40;
+          const maxWidth = this.res.w - (padding * 2);
+          const titleLines = this.wrapText(slide.mainText, maxWidth, titleSize);
+          const descLines = this.wrapText(slide.descText, maxWidth, descSize);
+          const totalTitleH = titleLines.length * titleSize;
+          const totalDescH = descLines.length * descSize;
+          this.ctx.textBaseline = 'top';
+          let tx, ty;
+          const al = slide.alignment;
+          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
+          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
+          if (al === 'bl') { tx = padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'left'; }
+          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'right'; }
+          this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 1.0;
+          titleLines.forEach((line, i) => { this.ctx.fillText(line, tx, ty + (i * titleSize)); });
+          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 0.5;
+          descLines.forEach((line, i) => { this.ctx.fillText(line, tx, ty + totalTitleH + spacing + (i * descSize)); });
+        } else if (slide.layout === 'end') {
+          const fontSize = 180;
+          this.ctx.font = `900 ${fontSize}px 'Alfa Slab One'`;
+          const textMetrics = this.ctx.measureText(slide.mainText);
+          const tw = textMetrics.width;
+          const th = fontSize;
+          const px = 60, py = 20; 
+          const bw = tw + px * 2, bh = th + py * 2;
+
+          this.ctx.save();
+          this.ctx.translate(this.res.w/2, this.res.h/2);
+          this.ctx.rotate(slide.badgeAngle * Math.PI / 180);
+          this.ctx.fillStyle = '#1a1a1a';
+          this.ctx.globalAlpha = 0.2;
+          this.ctx.beginPath();
+          this.ctx.roundRect(-bw/2 + 10, -bh/2 + 10, bw, bh, slide.badgeRound);
+          this.ctx.fill();
+          this.ctx.globalAlpha = 1.0;
+          this.ctx.fillStyle = '#ffffff';
+          this.ctx.strokeStyle = '#1a1a1a';
+          this.ctx.lineWidth = slide.badgeBorder;
+          this.ctx.beginPath();
+          this.ctx.roundRect(-bw/2, -bh/2, bw, bh, slide.badgeRound);
+          this.ctx.fill();
+          this.ctx.stroke();
+          this.ctx.fillStyle = '#1a1a1a';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText(slide.mainText, 0, 0);
+          this.ctx.restore();
+
+          if (slide.linksText) {
+            const lSize = 35;
+            const lPadding = 60;
+            const lMaxWidth = this.res.w - (lPadding * 2);
+            this.ctx.font = `900 ${lSize}px 'Nunito'`;
+            const lLines = this.wrapText(slide.linksText, lMaxWidth, lSize);
+            const lTotalH = lLines.length * lSize;
+            let lx, ly;
+            const lal = slide.linksAlign;
+            this.ctx.textBaseline = 'top';
+            if (lal === 'tl') { lx = lPadding; ly = lPadding; this.ctx.textAlign = 'left'; }
+            if (lal === 'tr') { lx = this.res.w - lPadding; ly = lPadding; this.ctx.textAlign = 'right'; }
+            if (lal === 'bl') { lx = lPadding; ly = this.res.h - lPadding - lTotalH; this.ctx.textAlign = 'left'; }
+            if (lal === 'br') { lx = this.res.w - lPadding; ly = this.res.h - lPadding - lTotalH; this.ctx.textAlign = 'right'; }
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.globalAlpha = 0.6;
+            lLines.forEach((line, i) => { this.ctx.fillText(line, lx, ly + (i * lSize)); });
+          }
+        }
+        this.ctx.restore();
       }
 
       drawImageContent(slide, ox, oy) {
@@ -657,11 +810,9 @@
           let barY = this.res.h - barH;
           if (slide.overlayPos === 'top') barY = 0;
           if (slide.overlayPos === 'middle') barY = (this.res.h - barH) / 2;
-
           this.ctx.globalAlpha = slide.overlayOpacity;
           this.ctx.fillStyle = slide.overlayBgColor;
           this.ctx.fillRect(0, barY, this.res.w, barH);
-          
           this.ctx.globalAlpha = 1.0;
           this.ctx.fillStyle = slide.overlayTextColor;
           this.ctx.font = "900 60px 'Alfa Slab One'";
@@ -675,32 +826,21 @@
       drawAtTime(time) {
         this.ctx.clearRect(0, 0, this.res.w, this.res.h);
         if (this.slides.length === 0) return;
-
         let elapsed = 0;
         let found = false;
-
         for(let i=0; i<this.slides.length; i++) {
           const current = this.slides[i];
           const next = this.slides[i+1];
-          const stayTime = current.duration;
-          const transTime = 700;
-          const total = stayTime + transTime;
-
+          const total = current.duration + 700;
           if (time >= elapsed && time < elapsed + total) {
-            const slideT = (time - elapsed) / total;
-            const stayPercent = stayTime / total;
-            let progress = 0;
-            if (slideT > stayPercent) progress = this.ease((slideT - stayPercent) / (1 - stayPercent));
-
+            const progress = (time - elapsed) > current.duration ? this.ease(((time - elapsed) - current.duration) / 700) : 0;
             const dir = current.direction;
             let ox = 0, oy = 0;
             if (dir === 'left') ox = -progress * this.res.w;
             else if (dir === 'right') ox = progress * this.res.w;
             else if (dir === 'up') oy = -progress * this.res.h;
             else if (dir === 'down') oy = progress * this.res.h;
-
             this.drawFrame(current, ox, oy);
-
             if (next && progress > 0) {
               let nx = ox, ny = oy;
               if (dir === 'left') nx += this.res.w;
@@ -714,19 +854,22 @@
           }
           elapsed += total;
         }
-
         if (!found) this.drawFrame(this.slides[this.slides.length - 1], 0, 0);
-
-        // Update UI
         const totalDur = this.getTotalDuration();
         const percent = totalDur > 0 ? (time / totalDur) * 100 : 0;
         document.getElementById('scrubberProgress').style.width = `${percent}%`;
         document.getElementById('scrubberHandle').style.left = `${percent}%`;
-        
         const pad = (n) => Math.floor(n).toString().padStart(2, '0');
         const s = (time / 1000) % 60;
         const m = (time / 60000) % 60;
         document.getElementById('timecodeDisplay').innerText = `${pad(m)}:${pad(s)}`;
+      }
+
+      drawFrame(slide, ox, oy) {
+        this.ctx.fillStyle = slide.layout === 'end' ? '#000000' : '#FFB703';
+        this.ctx.fillRect(ox, oy, this.res.w, this.res.h);
+        if (slide.type === 'text') this.drawTextContent(slide, ox, oy);
+        else this.drawImageContent(slide, ox, oy);
       }
 
       renderLoop() {
@@ -734,33 +877,21 @@
           this.currentTime += 16.66;
           if (this.currentTime >= this.getTotalDuration()) {
             if (this.recorder && this.recorder.state === "recording") this.recorder.stop();
-            this.reset();
-            this.showToast("VIDEO FINISHED");
-          } else {
-            this.drawAtTime(this.currentTime);
-          }
-        } else if (!this.isAnimating) {
-           this.drawAtTime(this.currentTime);
-        }
+            this.reset(); this.showToast("VIDEO FINISHED");
+          } else { this.drawAtTime(this.currentTime); }
+        } else if (!this.isAnimating) { this.drawAtTime(this.currentTime); }
         requestAnimationFrame(() => this.renderLoop());
       }
       
       toggleFullscreen() {
         const preview = document.querySelector('.preview');
-        if (!document.fullscreenElement) {
-          preview.requestFullscreen().catch(err => {
-            this.showToast("Error enabling fullscreen");
-          });
-        } else {
-          document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) preview.requestFullscreen().catch(() => this.showToast("ERROR ENABLING FULLSCREEN"));
+        else document.exitFullscreen();
       }
-      
-      // Inherit other methods...
       toggleModalFields() {
         const layout = document.getElementById('modalLayout').value;
-        const fields = document.getElementById('alignableFields');
-        if (fields) fields.style.display = layout === 'intro-alignable' ? 'block' : 'none';
+        document.getElementById('alignableFields').style.display = layout === 'intro-alignable' ? 'block' : 'none';
+        document.getElementById('endFields').style.display = layout === 'end' ? 'block' : 'none';
       }
       closeModal() { document.getElementById('editModal').classList.remove('active'); }
       openExport() { document.getElementById('exportModal').classList.add('active'); }
@@ -781,31 +912,18 @@
       }
       removeSlide(index) { this.slides.splice(index, 1); this.updateSlideList(); }
       copyProject() {
-        const data = JSON.stringify(this.slides.map(s => {
-          const {img, ...rest} = s;
-          if (s.type === 'image') rest.imgData = img.src;
-          return rest;
-        }));
-        navigator.clipboard.writeText(data);
-        this.showToast("JSON COPIED");
+        const data = JSON.stringify(this.slides.map(s => { const {img, ...rest} = s; if (s.type === 'image') rest.imgData = img.src; return rest; }));
+        navigator.clipboard.writeText(data); this.showToast("JSON COPIED");
       }
       downloadProject() {
-        const data = JSON.stringify(this.slides.map(s => {
-          const {img, ...rest} = s;
-          if (s.type === 'image') rest.imgData = img.src;
-          return rest;
-        }));
+        const data = JSON.stringify(this.slides.map(s => { const {img, ...rest} = s; if (s.type === 'image') rest.imgData = img.src; return rest; }));
         const blob = new Blob([data], {type: 'application/json'});
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "project.tas-studio";
-        a.click();
+        const a = document.createElement('a'); a.href = url; a.download = "project.tas-studio"; a.click();
         this.showToast("DOWNLOADED .TAS-STUDIO");
       }
       async exportVideo(type) {
-        this.closeExport();
-        this.showToast(`RECORDING ${type.toUpperCase()}...`);
+        this.closeExport(); this.showToast(`RECORDING ${type.toUpperCase()}...`);
         const stream = this.canvas.captureStream(60);
         const mimeType = type === 'webm' ? 'video/webm;codecs=vp9' : 'video/mp4';
         try {
@@ -815,100 +933,11 @@
           this.recorder.onstop = () => {
             const blob = new Blob(this.recordedChunks, { type: mimeType });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `tas-video.${type}`;
-            a.click();
+            const a = document.createElement('a'); a.href = url; a.download = `tas-video.${type}`; a.click();
             this.showToast("EXPORT COMPLETE");
           };
-          this.currentTime = 0;
-          this.isAnimating = true;
-          this.recorder.start();
+          this.currentTime = 0; this.isAnimating = true; this.recorder.start();
         } catch(e) { this.showToast("FORMAT NOT SUPPORTED"); }
-      }
-      wrapText(text, maxWidth, baseSize) {
-        if (!text) return [];
-        const words = text.split(' ');
-        const lines = [];
-        let currentLine = words[0];
-
-        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
-
-        for (let i = 1; i < words.length; i++) {
-          const word = words[i];
-          const width = this.ctx.measureText(currentLine + " " + word).width;
-          if (width < maxWidth) {
-            currentLine += " " + word;
-          } else {
-            lines.push(currentLine);
-            currentLine = word;
-          }
-        }
-        lines.push(currentLine);
-        return lines;
-      }
-      drawTextContent(slide, ox, oy) {
-        this.ctx.save();
-        this.ctx.translate(ox, oy);
-        this.ctx.fillStyle = '#1a1a1a';
-        if (slide.layout === 'center') {
-          let baseSize = 200;
-          const maxWidth = this.res.w * 0.8;
-          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          if (lines.length > 4) { baseSize = 120; lines = this.wrapText(slide.mainText, maxWidth, baseSize); }
-          if (lines.length > 8) { baseSize = 80; lines = this.wrapText(slide.mainText, maxWidth, baseSize); }
-          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          const totalH = lines.length * baseSize;
-          lines.forEach((line, i) => {
-            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
-            this.ctx.fillText(line, this.res.w / 2, y);
-          });
-        } else {
-          // Intro, Alignable
-          const titleSize = 100;
-          const descSize = 45;
-          const padding = 100;
-          const spacing = 40;
-          const maxWidth = this.res.w - (padding * 2);
-          
-          const titleLines = this.wrapText(slide.mainText, maxWidth, titleSize);
-          const descLines = this.wrapText(slide.descText, maxWidth, descSize);
-          
-          const totalTitleH = titleLines.length * titleSize;
-          const totalDescH = descLines.length * descSize;
-
-          this.ctx.textBaseline = 'top';
-          let tx, ty;
-          const al = slide.alignment;
-
-          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
-          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
-          if (al === 'bl') { tx = padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'left'; }
-          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'right'; }
-
-          // Draw Title
-          this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
-          this.ctx.globalAlpha = 1.0;
-          titleLines.forEach((line, i) => {
-            this.ctx.fillText(line, tx, ty + (i * titleSize));
-          });
-          
-          // Draw Description
-          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
-          this.ctx.globalAlpha = 0.5;
-          descLines.forEach((line, i) => {
-            this.ctx.fillText(line, tx, ty + totalTitleH + spacing + (i * descSize));
-          });
-        }
-        this.ctx.restore();
-      }
-      drawFrame(slide, ox, oy) {
-        this.ctx.fillStyle = '#FFB703';
-        this.ctx.fillRect(ox, oy, this.res.w, this.res.h);
-        if (slide.type === 'text') this.drawTextContent(slide, ox, oy);
-        else this.drawImageContent(slide, ox, oy);
       }
     }
     window.studio = new TASVideoStudio();
