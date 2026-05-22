@@ -815,15 +815,22 @@
         } catch(e) { this.showToast("FORMAT NOT SUPPORTED"); }
       }
       wrapText(text, maxWidth, baseSize) {
+        if (!text) return [];
         const words = text.split(' ');
         const lines = [];
         let currentLine = words[0];
+
         this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+
         for (let i = 1; i < words.length; i++) {
           const word = words[i];
           const width = this.ctx.measureText(currentLine + " " + word).width;
-          if (width < maxWidth) currentLine += " " + word;
-          else { lines.push(currentLine); currentLine = word; }
+          if (width < maxWidth) {
+            currentLine += " " + word;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
         }
         lines.push(currentLine);
         return lines;
@@ -847,23 +854,41 @@
             this.ctx.fillText(line, this.res.w / 2, y);
           });
         } else {
+          // Intro, Alignable
           const titleSize = 100;
           const descSize = 45;
           const padding = 100;
-          const spacing = 30;
+          const spacing = 40;
+          const maxWidth = this.res.w - (padding * 2);
+          
+          const titleLines = this.wrapText(slide.mainText, maxWidth, titleSize);
+          const descLines = this.wrapText(slide.descText, maxWidth, descSize);
+          
+          const totalTitleH = titleLines.length * titleSize;
+          const totalDescH = descLines.length * descSize;
+
           this.ctx.textBaseline = 'top';
           let tx, ty;
           const al = slide.alignment;
+
           if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
           if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
-          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
-          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
+          if (al === 'bl') { tx = padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'left'; }
+          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'right'; }
+
+          // Draw Title
           this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
           this.ctx.globalAlpha = 1.0;
-          this.ctx.fillText(slide.mainText, tx, ty);
+          titleLines.forEach((line, i) => {
+            this.ctx.fillText(line, tx, ty + (i * titleSize));
+          });
+          
+          // Draw Description
           this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
           this.ctx.globalAlpha = 0.5;
-          this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
+          descLines.forEach((line, i) => {
+            this.ctx.fillText(line, tx, ty + totalTitleH + spacing + (i * descSize));
+          });
         }
         this.ctx.restore();
       }
