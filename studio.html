@@ -10,7 +10,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=swap');
 
     :root {
-      --bg: #FFB703; /* Yellow from icon_maker */
+      --bg: #FFB703; 
       --panel-bg: #ffffff;
       --dark: #1a1a1a;
       --border: 5px solid var(--dark);
@@ -29,7 +29,6 @@
       flex-direction: column;
     }
 
-    /* TOP LEFT INFO */
     .studio-header {
       position: fixed;
       top: 30px;
@@ -54,7 +53,6 @@
       margin-top: 5px;
     }
 
-    /* MAIN CONTAINER */
     .app-grid {
       display: grid;
       grid-template-columns: 420px 1fr;
@@ -64,7 +62,6 @@
       gap: 40px;
     }
 
-    /* SIDEBAR CONTROLS */
     .controls {
       background: var(--panel-bg);
       border: var(--border);
@@ -74,7 +71,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
-      overflow-y: auto;
+      overflow-y: hidden;
     }
 
     .control-group label {
@@ -109,14 +106,14 @@
     .btn-blue { background: var(--accent); }
     .btn-pink { background: var(--danger); color: #fff; }
     .btn-white { background: #fff; }
-    .btn-mini { padding: 8px; font-size: 10px; border-radius: 10px; }
 
-    /* SLIDE LIST */
     .slide-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
+      padding-bottom: 20px;
     }
+    
     .slide-item {
       display: flex;
       align-items: center;
@@ -125,25 +122,28 @@
       border: 4px solid var(--dark);
       border-radius: 15px;
       padding: 12px;
+      cursor: grab;
       position: relative;
-      transition: 0.2s;
+      transition: 0.2s, transform 0.1s;
+      user-select: none;
     }
+    .slide-item:active { cursor: grabbing; transform: scale(0.98); }
+    .slide-item.dragging { opacity: 0.5; border-style: dashed; background: #eee; }
     .slide-item.active { border-color: var(--accent); background: #e8f8ff; }
     
     .slide-index {
-      width: 30px; height: 30px; background: var(--dark); color: #fff;
+      width: 24px; height: 24px; background: var(--dark); color: #fff;
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-family: 'Alfa Slab One', serif; font-size: 12px;
+      font-family: 'Alfa Slab One', serif; font-size: 10px;
     }
 
-    .slide-type-icon { font-size: 20px; color: var(--dark); width: 30px; text-align: center; }
+    .slide-type-icon { font-size: 18px; color: var(--dark); width: 25px; text-align: center; }
 
-    .slide-controls { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-    .action-icon { cursor: pointer; transition: 0.1s; font-size: 14px; }
+    .slide-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .action-icon { cursor: pointer; transition: 0.1s; font-size: 16px; }
     .action-icon:hover { transform: scale(1.2); color: var(--danger); }
-    .action-icon.move:hover { color: var(--accent); }
+    .action-icon.edit:hover { color: var(--accent); }
 
-    /* PREVIEW AREA */
     .preview {
       background: #111;
       border: var(--border);
@@ -155,13 +155,8 @@
       justify-content: center;
       overflow: hidden;
     }
-    canvas {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
+    canvas { width: 100%; height: 100%; object-fit: contain; }
 
-    /* MODAL FOR EDITING SLIDE */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8);
       z-index: 3000; display: none; align-items: center; justify-content: center;
@@ -170,18 +165,18 @@
     .modal.active { display: flex; }
     .modal-content {
       background: #fff; border: var(--border); border-radius: 30px;
-      width: 100%; max-width: 500px; padding: 40px; box-shadow: 20px 20px 0px var(--dark);
+      width: 100%; max-width: 600px; padding: 40px; box-shadow: 20px 20px 0px var(--dark);
+      max-height: 90vh; overflow-y: auto;
     }
     .input-box {
-      width: 100%; border: 4px solid var(--dark); border-radius: 15px; padding: 15px;
-      font-family: 'Alfa Slab One', serif; font-size: 18px; background: #f9f9f9; outline: none; margin-bottom: 20px;
+      width: 100%; border: 4px solid var(--dark); border-radius: 15px; padding: 12px;
+      font-family: 'Alfa Slab One', serif; font-size: 16px; outline: none; margin-bottom: 15px; background: #f9f9f9;
     }
     .select-box {
       width: 100%; border: 4px solid var(--dark); border-radius: 15px; padding: 12px;
-      font-family: 'Nunito', sans-serif; font-weight: 900; background: #f9f9f9; margin-bottom: 20px;
+      font-family: 'Nunito', sans-serif; font-weight: 900; background: #f9f9f9; margin-bottom: 15px;
     }
 
-    /* TOAST */
     .toast {
       position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
       background: var(--dark); color: #fff; padding: 15px 30px; border-radius: 15px;
@@ -190,8 +185,9 @@
     }
     .toast.active { transform: translateX(-50%) translateY(0); }
 
-    input[type="file"] { display: none; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
+    input[type="file"] { display: none; }
   </style>
 </head>
 <body>
@@ -202,28 +198,16 @@
   </div>
 
   <div class="app-grid">
-    
     <div class="controls">
-      
-      <div class="control-group">
-        <label>Slide Direction</label>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button class="btn-action btn-white btn-mini" id="dir-up" onclick="studio.setDirection('up')">UP</button>
-          <button class="btn-action btn-white btn-mini" id="dir-down" onclick="studio.setDirection('down')">DOWN</button>
-          <button class="btn-action btn-white btn-mini" id="dir-left" onclick="studio.setDirection('left')">LEFT</button>
-          <button class="btn-action btn-white btn-mini" id="dir-right" onclick="studio.setDirection('right')">RIGHT</button>
-        </div>
-      </div>
-
-      <div class="control-group" style="flex:1; display:flex; flex-direction:column;">
-        <label>Sequence</label>
+      <div class="control-group" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+        <label>Slide Sequence (Drag to reorder)</label>
         <div class="slide-list" id="slideList" style="flex:1; overflow-y:auto; padding-right:5px;">
           <div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES</div>
         </div>
       </div>
 
       <div class="control-group">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div class="grid-2">
           <button class="btn-action btn-blue" onclick="studio.addNewSlide('text')">
             <i class="fa-solid fa-plus"></i> TEXT
           </button>
@@ -247,23 +231,38 @@
     <div class="preview">
       <canvas id="previewCanvas"></canvas>
     </div>
-
   </div>
 
   <!-- SLIDE EDITOR MODAL -->
   <div class="modal" id="editModal">
     <div class="modal-content">
-      <h2 style="font-family:'Alfa Slab One'; margin-bottom:20px; text-transform:uppercase;">Edit Slide</h2>
+      <h2 style="font-family:'Alfa Slab One'; margin-bottom:20px; text-transform:uppercase;">Slide Properties</h2>
       
-      <div id="textFields">
-        <label style="font-weight:900; font-size:11px; text-transform:uppercase; color:#aaa;">Main Title / Content</label>
+      <div class="control-group">
+        <label>Transition Direction</label>
+        <select id="modalDirection" class="select-box">
+          <option value="up">UP</option>
+          <option value="down">DOWN</option>
+          <option value="left">LEFT</option>
+          <option value="right">RIGHT</option>
+        </select>
+      </div>
+
+      <div id="textOnlyFields">
+        <label>Main Text</label>
         <textarea id="modalMainText" class="input-box" rows="2"></textarea>
         
-        <div id="introOnlyFields" style="display:none;">
-          <label style="font-weight:900; font-size:11px; text-transform:uppercase; color:#aaa;">Description (Shows above Title)</label>
+        <label>Layout Style</label>
+        <select id="modalLayout" class="select-box" onchange="studio.toggleModalFields()">
+          <option value="center">Center</option>
+          <option value="intro-alignable">Intro, Alignable</option>
+        </select>
+
+        <div id="alignableFields" style="display:none;">
+          <label>Description (Under Title)</label>
           <textarea id="modalDescText" class="input-box" rows="2"></textarea>
           
-          <label style="font-weight:900; font-size:11px; text-transform:uppercase; color:#aaa;">Corner Alignment</label>
+          <label>Corner Alignment</label>
           <select id="modalAlign" class="select-box">
             <option value="tl">Top Left</option>
             <option value="tr">Top Right</option>
@@ -271,16 +270,29 @@
             <option value="br">Bottom Right</option>
           </select>
         </div>
-
-        <label style="font-weight:900; font-size:11px; text-transform:uppercase; color:#aaa;">Layout Style</label>
-        <select id="modalLayout" class="select-box" onchange="studio.toggleModalFields()">
-          <option value="center">Center</option>
-          <option value="intro-alignable">Intro, Alignable</option>
-        </select>
       </div>
 
-      <div style="display:flex; gap:15px;">
-        <button class="btn-action btn-blue" onclick="studio.saveEdit()">Save Changes</button>
+      <div id="imageOnlyFields" style="display:none;">
+        <label>Fitting Mode</label>
+        <select id="modalFitting" class="select-box">
+          <option value="floating">Floating (Centered + Pad)</option>
+          <option value="cover">Cover (Fill Slide)</option>
+          <option value="contain">Contain (Black Bars)</option>
+          <option value="stretch">Stretch (Squash to Fit)</option>
+        </select>
+
+        <label>Outline</label>
+        <select id="modalOutline" class="select-box">
+          <option value="on">Enabled</option>
+          <option value="off">Disabled</option>
+        </select>
+
+        <label>Overlay Text (Optional)</label>
+        <textarea id="modalImgOverlayText" class="input-box" rows="2" placeholder="Text over image..."></textarea>
+      </div>
+
+      <div class="grid-2">
+        <button class="btn-action btn-blue" onclick="studio.saveEdit()">Save</button>
         <button class="btn-action btn-white" onclick="studio.closeModal()">Cancel</button>
       </div>
     </div>
@@ -294,14 +306,12 @@
         this.canvas = document.getElementById('previewCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.res = { w: 1920, h: 1080 };
-        
         this.slides = []; 
-        this.direction = 'left';
         this.isAnimating = false;
         this.playIndex = -1;
         this.t = 0;
-        
         this.editingIndex = -1;
+        this.draggedItem = null;
 
         this.init();
       }
@@ -309,26 +319,22 @@
       init() {
         this.canvas.width = this.res.w;
         this.canvas.height = this.res.h;
-        this.setDirection('left');
         this.renderLoop();
       }
 
-      setDirection(dir) {
-        this.direction = dir;
-        document.querySelectorAll('.btn-mini').forEach(b => b.classList.remove('active'));
-        document.getElementById(`dir-${dir}`).classList.add('active');
-      }
-
       addNewSlide(type) {
-        const slide = {
+        this.slides.push({
           type: type,
+          direction: 'left',
           layout: 'center',
           alignment: 'tl',
-          mainText: 'NEW CONTENT',
-          descText: 'SUBTITLE HERE',
+          mainText: 'NEW SLIDE',
+          descText: '',
+          fitting: 'floating',
+          outline: 'on',
+          overlayText: '',
           img: null
-        };
-        this.slides.push(slide);
+        });
         this.updateSlideList();
         this.openEdit(this.slides.length - 1);
       }
@@ -344,7 +350,10 @@
               this.slides.push({
                 type: 'image',
                 img: img,
-                layout: 'center'
+                direction: 'left',
+                fitting: 'floating',
+                outline: 'on',
+                overlayText: ''
               });
               loaded++;
               if (loaded === files.length) {
@@ -365,25 +374,32 @@
           return;
         }
         list.innerHTML = this.slides.map((s, i) => `
-          <div class="slide-item ${this.playIndex === i ? 'active' : ''}">
+          <div class="slide-item ${this.playIndex === i ? 'active' : ''}" 
+               draggable="true" 
+               ondragstart="studio.handleDragStart(event, ${i})"
+               ondragover="event.preventDefault()"
+               ondrop="studio.handleDrop(event, ${i})">
             <div class="slide-index">${i + 1}</div>
             <div class="slide-type-icon">
               <i class="fa-solid ${s.type === 'image' ? 'fa-image' : 'fa-font'}"></i>
             </div>
             <div class="slide-controls">
-              <i class="fa-solid fa-pen-to-square action-icon move" onclick="studio.openEdit(${i})"></i>
-              <i class="fa-solid fa-chevron-up action-icon move" onclick="studio.moveSlide(${i}, -1)"></i>
-              <i class="fa-solid fa-chevron-down action-icon move" onclick="studio.moveSlide(${i}, 1)"></i>
+              <i class="fa-solid fa-pen-to-square action-icon edit" onclick="studio.openEdit(${i})"></i>
               <i class="fa-solid fa-trash-can action-icon" onclick="studio.removeSlide(${i})"></i>
             </div>
           </div>
         `).join('');
       }
 
-      moveSlide(index, delta) {
-        const newIndex = index + delta;
-        if (newIndex < 0 || newIndex >= this.slides.length) return;
-        [this.slides[index], this.slides[newIndex]] = [this.slides[newIndex], this.slides[index]];
+      handleDragStart(e, i) {
+        this.draggedItem = i;
+        e.target.classList.add('dragging');
+      }
+
+      handleDrop(e, i) {
+        e.preventDefault();
+        const item = this.slides.splice(this.draggedItem, 1)[0];
+        this.slides.splice(i, 0, item);
         this.updateSlideList();
       }
 
@@ -396,35 +412,44 @@
         const s = this.slides[index];
         this.editingIndex = index;
         document.getElementById('editModal').classList.add('active');
-        
+        document.getElementById('modalDirection').value = s.direction;
+
         if (s.type === 'text') {
-          document.getElementById('textFields').style.display = 'block';
+          document.getElementById('textOnlyFields').style.display = 'block';
+          document.getElementById('imageOnlyFields').style.display = 'none';
           document.getElementById('modalMainText').value = s.mainText;
           document.getElementById('modalDescText').value = s.descText;
           document.getElementById('modalLayout').value = s.layout;
           document.getElementById('modalAlign').value = s.alignment;
           this.toggleModalFields();
         } else {
-          document.getElementById('textFields').style.display = 'none';
+          document.getElementById('textOnlyFields').style.display = 'none';
+          document.getElementById('imageOnlyFields').style.display = 'block';
+          document.getElementById('modalFitting').value = s.fitting;
+          document.getElementById('modalOutline').value = s.outline;
+          document.getElementById('modalImgOverlayText').value = s.overlayText || '';
         }
       }
 
       toggleModalFields() {
         const layout = document.getElementById('modalLayout').value;
-        document.getElementById('introOnlyFields').style.display = layout === 'intro-alignable' ? 'block' : 'none';
+        document.getElementById('alignableFields').style.display = layout === 'intro-alignable' ? 'block' : 'none';
       }
 
-      closeModal() {
-        document.getElementById('editModal').classList.remove('active');
-      }
+      closeModal() { document.getElementById('editModal').classList.remove('active'); }
 
       saveEdit() {
         const s = this.slides[this.editingIndex];
+        s.direction = document.getElementById('modalDirection').value;
         if (s.type === 'text') {
           s.mainText = document.getElementById('modalMainText').value;
           s.descText = document.getElementById('modalDescText').value;
           s.layout = document.getElementById('modalLayout').value;
           s.alignment = document.getElementById('modalAlign').value;
+        } else {
+          s.fitting = document.getElementById('modalFitting').value;
+          s.outline = document.getElementById('modalOutline').value;
+          s.overlayText = document.getElementById('modalImgOverlayText').value;
         }
         this.updateSlideList();
         this.closeModal();
@@ -452,56 +477,77 @@
         setTimeout(() => t.classList.remove('active'), 2500);
       }
 
-      ease(t) {
-        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      }
+      wrapText(text, maxWidth, baseSize) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
 
-      getDynamicFontSize(text, base, minSize = 40) {
-        const len = text.length;
-        if (len < 10) return base;
-        return Math.max(minSize, base * (10 / len));
+        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = this.ctx.measureText(currentLine + " " + word).width;
+          if (width < maxWidth) {
+            currentLine += " " + word;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        }
+        lines.push(currentLine);
+        return lines;
       }
 
       drawTextContent(slide, ox, oy) {
         this.ctx.save();
         this.ctx.translate(ox, oy);
         this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.textAlign = 'center';
 
         if (slide.layout === 'center') {
-          const fontSize = this.getDynamicFontSize(slide.mainText, 240, 60);
-          this.ctx.font = `900 ${fontSize}px 'Alfa Slab One'`;
-          const lines = slide.mainText.split('\n');
+          let baseSize = 200;
+          const maxWidth = this.res.w * 0.8;
+          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          
+          // Shrink if too many lines
+          if (lines.length > 4) {
+            baseSize = 120;
+            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          }
+          if (lines.length > 8) {
+            baseSize = 80;
+            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          }
+
+          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          
+          const totalH = lines.length * baseSize;
           lines.forEach((line, i) => {
-            const y = (this.res.h / 2) + (i - (lines.length - 1) / 2) * (fontSize * 0.9);
+            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
             this.ctx.fillText(line, this.res.w / 2, y);
           });
         } else {
-          // Intro, Alignable
-          const titleSize = this.getDynamicFontSize(slide.mainText, 120, 40);
-          const descSize = titleSize * 0.45;
-          const padding = 80;
-          const spacing = titleSize * 0.6; // Increased spacing between lines
+          // Alignable
+          const titleSize = 100;
+          const descSize = 45;
+          const padding = 100;
+          const spacing = 30;
           
+          this.ctx.textBaseline = 'top';
           let tx, ty;
           const al = slide.alignment;
-          
-          // Use top baseline for easier vertical stacking
-          this.ctx.textBaseline = 'top';
 
           if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
           if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
           if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
           if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
 
-          // Draw Title (Top)
-          this.ctx.globalAlpha = 1.0;
           this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 1.0;
           this.ctx.fillText(slide.mainText, tx, ty);
-          
-          // Draw Description (Bottom)
+          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
           this.ctx.globalAlpha = 0.5;
-          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`; // Unified font
           this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
         }
         this.ctx.restore();
@@ -509,14 +555,43 @@
 
       drawImageContent(slide, ox, oy) {
         const img = slide.img;
-        const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
-        const nw = img.width * ratio;
-        const nh = img.height * ratio;
+        let dw, dh, dx, dy;
+        const mode = slide.fitting;
+
         this.ctx.save();
         this.ctx.translate(ox, oy);
-        this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.fillRect((this.res.w - nw) / 2 - 10, (this.res.h - nh) / 2 - 10, nw + 20, nh + 20);
-        this.ctx.drawImage(img, (this.res.w - nw) / 2, (this.res.h - nh) / 2, nw, nh);
+
+        if (mode === 'floating') {
+          const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
+          dw = img.width * ratio; dh = img.height * ratio;
+          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
+          if (slide.outline === 'on') {
+            this.ctx.fillStyle = '#1a1a1a';
+            this.ctx.fillRect(dx - 10, dy - 10, dw + 20, dh + 20);
+          }
+        } else if (mode === 'cover') {
+          const ratio = Math.max(this.res.w / img.width, this.res.h / img.height);
+          dw = img.width * ratio; dh = img.height * ratio;
+          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
+        } else if (mode === 'contain') {
+          const ratio = Math.min(this.res.w / img.width, this.res.h / img.height);
+          dw = img.width * ratio; dh = img.height * ratio;
+          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
+        } else if (mode === 'stretch') {
+          dw = this.res.w; dh = this.res.h; dx = 0; dy = 0;
+        }
+
+        this.ctx.drawImage(img, dx, dy, dw, dh);
+
+        if (slide.overlayText) {
+          this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
+          this.ctx.fillRect(0, this.res.h - 150, this.res.w, 150);
+          this.ctx.fillStyle = '#fff';
+          this.ctx.font = "900 60px 'Alfa Slab One'";
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText(slide.overlayText.toUpperCase(), this.res.w / 2, this.res.h - 75);
+        }
         this.ctx.restore();
       }
 
@@ -527,13 +602,14 @@
         else this.drawImageContent(slide, ox, oy);
       }
 
+      ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
       renderLoop() {
         this.ctx.clearRect(0, 0, this.res.w, this.res.h);
 
         if (!this.isAnimating) {
           if (this.slides.length > 0) this.drawFrame(this.slides[0], 0, 0);
           else {
-            // Default placeholder
             this.ctx.fillStyle = '#FFB703';
             this.ctx.fillRect(0, 0, this.res.w, this.res.h);
             this.ctx.fillStyle = '#1a1a1a';
@@ -544,46 +620,38 @@
         } else {
           const current = this.slides[this.playIndex];
           const next = this.slides[this.playIndex + 1];
+          const dir = current.direction;
 
           this.t += 0.008;
           let progress = 0;
           if (this.t > 0.7) progress = this.ease((this.t - 0.7) / 0.3);
 
           let ox = 0, oy = 0;
-          if (this.direction === 'left') ox = -progress * this.res.w;
-          if (this.direction === 'right') ox = progress * this.res.w;
-          if (this.direction === 'up') oy = -progress * this.res.h;
-          if (this.direction === 'down') oy = progress * this.res.h;
+          if (dir === 'left') ox = -progress * this.res.w;
+          else if (dir === 'right') ox = progress * this.res.w;
+          else if (dir === 'up') oy = -progress * this.res.h;
+          else if (dir === 'down') oy = progress * this.res.h;
 
-          // Draw current
           this.drawFrame(current, ox, oy);
 
-          // Draw next pushing
           if (next && progress > 0) {
             let nx = ox, ny = oy;
-            if (this.direction === 'left') nx += this.res.w;
-            if (this.direction === 'right') nx -= this.res.w;
-            if (this.direction === 'up') ny += this.res.h;
-            if (this.direction === 'down') ny -= this.res.h;
+            if (dir === 'left') nx += this.res.w;
+            else if (dir === 'right') nx -= this.res.w;
+            else if (dir === 'up') ny += this.res.h;
+            else if (dir === 'down') ny -= this.res.h;
             this.drawFrame(next, nx, ny);
           }
 
           if (this.t >= 1) {
             if (this.playIndex < this.slides.length - 1) {
-              this.playIndex++;
-              this.t = 0;
-              this.updateSlideList();
-            } else {
-              this.reset();
-              this.showToast("VIDEO FINISHED");
-            }
+              this.playIndex++; this.t = 0; this.updateSlideList();
+            } else { this.reset(); this.showToast("VIDEO FINISHED"); }
           }
         }
-
         requestAnimationFrame(() => this.renderLoop());
       }
     }
-
     window.studio = new TASVideoStudio();
   </script>
 </body>
