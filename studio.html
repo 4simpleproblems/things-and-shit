@@ -3,644 +3,447 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>t.a.s studio | high-performance 2D editor</title>
-  
+  <title>t.a.s studio | things and s***.</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&family=Roboto+Mono:wght@700&display=block');
+    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=swap');
 
     :root {
-      --bg: #f9f9f9;
+      --bg: #f0f0f0;
       --panel-bg: #ffffff;
       --accent: #FFB703;
       --danger: #FF0054;
       --info: #70D6FF;
       --dark: #1a1a1a;
       --border: 5px solid var(--dark);
-      --shadow: 10px 10px 0px var(--dark);
-      --header-height: 70px;
-      --sidebar-width: 300px;
-      --timeline-height: 250px;
+      --shadow: 8px 8px 0px #e0e0e0;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
+      background: var(--bg); 
       font-family: 'Nunito', sans-serif; 
-      background-color: var(--bg); 
-      color: var(--dark); 
       overflow: hidden; 
       height: 100vh;
-      display: flex;
-      flex-direction: column;
+      width: 100vw;
     }
 
-    /* HEADER */
-    header {
-      height: var(--header-height);
-      background: var(--dark);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 30px;
-      z-index: 100;
-      border-bottom: 5px solid var(--dark);
+    /* TOP LEFT HEADER */
+    .studio-info {
+      position: fixed;
+      top: 30px;
+      left: 30px;
+      z-index: 1000;
+      pointer-events: none;
     }
-
-    .logo { font-family: 'Alfa Slab One', serif; font-size: 24px; letter-spacing: -1px; }
-    .logo span { color: #ccc; }
-
-    .header-actions { display: flex; gap: 15px; }
-    .btn {
-      padding: 10px 20px;
-      border: 3px solid var(--dark);
-      border-radius: 12px;
+    .studio-info h1 {
       font-family: 'Alfa Slab One', serif;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+      font-size: 32px;
+      color: var(--dark);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .studio-info h1 span {
+      display: inline-block; padding: 2px 12px; background: #fff; border: 4px solid var(--dark); border-radius: 10px;
+      transform: rotate(-3deg); margin-left: 5px;
+    }
+    .studio-info p {
+      font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 3px; font-size: 10px; margin-top: 5px;
+    }
+
+    /* SLIDING VIEWPORT */
+    .viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+    }
+
+    .frame {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
       display: flex;
       align-items: center;
-      gap: 8px;
-      text-transform: uppercase;
-    }
-    .btn-primary { background: var(--accent); color: var(--dark); box-shadow: 4px 4px 0px rgba(0,0,0,0.2); }
-    .btn-secondary { background: #fff; color: var(--dark); box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
-    .btn:hover { transform: translateY(-3px); box-shadow: 8px 8px 0px rgba(0,0,0,0.2); }
-    .btn:active { transform: translateY(0); box-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
-
-    /* MAIN LAYOUT */
-    .studio-grid {
-      flex: 1;
-      display: grid;
-      grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-width);
-      grid-template-rows: 1fr var(--timeline-height);
-      overflow: hidden;
+      justify-content: center;
+      padding: 100px 60px 60px;
     }
 
-    /* PANELS */
+    /* Frame Grid Layout:
+       (0,0) Assets    | (1,0) Studio (Preview)
+       (0,1) Timeline  | (1,1) Export/Settings
+    */
+    .frame-assets   { top: 0; left: 0; background: var(--bg); }
+    .frame-studio   { top: 0; left: 100vw; background: var(--bg); }
+    .frame-timeline { top: 100vh; left: 0; background: var(--bg); }
+    .frame-export   { top: 100vh; left: 100vw; background: var(--bg); }
+
+    /* CONTENT PANELS (Styled like icon_maker) */
     .panel {
       background: var(--panel-bg);
-      border: 3px solid var(--dark);
+      border: var(--border);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
     .panel-header {
-      padding: 15px 20px;
-      background: var(--dark);
-      color: #fff;
-      font-family: 'Alfa Slab One', serif;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      padding: 20px 30px;
+      border-bottom: 5px solid var(--dark);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
+    .panel-header h2 {
+      font-family: 'Alfa Slab One', serif;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
     .panel-content {
       flex: 1;
+      padding: 30px;
       overflow-y: auto;
-      padding: 20px;
     }
 
-    /* MEDIA LIBRARY */
-    .media-item {
-      background: #f0f0f0;
-      border: 3px solid var(--dark);
+    /* NAVIGATION BUTTONS */
+    .nav-controls {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      display: grid;
+      grid-template-columns: 60px 60px 60px;
+      grid-template-rows: 60px 60px;
+      gap: 15px;
+    }
+
+    .nav-btn {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border: 4px solid var(--dark);
       border-radius: 15px;
-      padding: 15px;
-      margin-bottom: 15px;
-      cursor: grab;
-      transition: 0.2s;
-    }
-    .media-item:hover { border-color: var(--accent); transform: scale(1.02); }
-    .media-item i { font-size: 24px; margin-bottom: 10px; display: block; }
-    .media-name { font-weight: 900; font-size: 13px; word-break: break-all; }
-
-    /* PREVIEW CANVAS */
-    .preview-container {
-      background: #eee;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      overflow: hidden;
-      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 4px 4px 0px #ccc;
+      transition: all 0.2s;
     }
+    .nav-btn:hover { transform: translateY(-2px); box-shadow: 6px 6px 0px #ccc; }
+    .nav-btn:active { transform: translateY(0); box-shadow: 2px 2px 0px #ccc; }
+    .nav-btn.active { background: var(--accent); box-shadow: 4px 4px 0px var(--dark); }
+
+    .btn-up    { grid-column: 2; grid-row: 1; }
+    .btn-left  { grid-column: 1; grid-row: 2; }
+    .btn-down  { grid-column: 2; grid-row: 2; }
+    .btn-right { grid-column: 3; grid-row: 2; }
+
+    /* STUDIO SPECIFIC ELEMENTS */
     #mainCanvas {
-      background: #000;
-      box-shadow: var(--shadow);
-      max-width: 95%;
-      max-height: 95%;
-      object-fit: contain;
-    }
-
-    /* INSPECTOR */
-    .inspector-group { margin-bottom: 25px; }
-    .inspector-label { 
-      font-family: 'Alfa Slab One', serif; 
-      font-size: 10px; 
-      color: #aaa; 
-      margin-bottom: 10px; 
-      text-transform: uppercase; 
-    }
-    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .input-field {
-      background: var(--bg);
-      border: 3px solid var(--dark);
-      border-radius: 10px;
-      padding: 10px;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
       width: 100%;
-    }
-    .input-field:focus { outline: none; border-color: var(--accent); }
-
-    /* TIMELINE */
-    .timeline-panel {
-      grid-column: 1 / span 3;
-      border-top: 5px solid var(--dark);
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
+      height: 100%;
+      background: #000;
+      border-radius: 15px;
+      object-fit: contain;
+      box-shadow: 10px 10px 0px rgba(0,0,0,0.1);
     }
 
-    .timeline-toolbar {
-      height: 50px;
-      background: var(--dark);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
     }
 
-    .timecode { font-family: 'Roboto Mono', monospace; font-size: 18px; color: var(--accent); }
+    .asset-item {
+      background: #f9f9f9;
+      border: 4px solid var(--dark);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      cursor: grab;
+      transition: 0.2s;
+    }
+    .asset-item:hover { transform: scale(1.05); border-color: var(--accent); }
+    .asset-item i { font-size: 40px; margin-bottom: 15px; display: block; color: var(--info); }
+    .asset-item span { font-weight: 900; font-size: 14px; text-transform: uppercase; }
 
-    .timeline-container {
-      flex: 1;
-      overflow: auto;
-      position: relative;
-      background-image: 
-        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
-        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
-      background-size: 100px 50px;
+    .control-group { margin-bottom: 25px; }
+    .control-group label { display: block; font-weight: 900; margin-bottom: 10px; font-size: 12px; text-transform: uppercase; color: #333; }
+    
+    .input-box {
+      width: 100%; border: 4px solid var(--dark); border-radius: 15px; padding: 12px;
+      font-family: 'Alfa Slab One', serif; font-size: 16px; outline: none;
+      background: #f9f9f9;
     }
 
-    .track {
-      height: 50px;
-      border-bottom: 2px solid rgba(0,0,0,0.1);
-      position: relative;
-      display: flex;
-      align-items: center;
+    .slider {
+      -webkit-appearance: none; width: 100%; height: 10px; border-radius: 5px;
+      background: #e8e8e8; outline: none; border: 2px solid var(--dark);
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 25px; height: 25px; border-radius: 50%;
+      background: var(--accent); border: 4px solid var(--dark); cursor: pointer;
     }
 
-    .clip {
-      position: absolute;
-      height: 40px;
-      background: var(--info);
-      border: 3px solid var(--dark);
-      border-radius: 8px;
-      box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      padding: 0 10px;
-      font-size: 11px;
-      font-weight: 900;
-      overflow: hidden;
-      white-space: nowrap;
+    .action-btn {
+      width: 100%; padding: 15px; background: var(--accent); border: 4px solid var(--dark);
+      border-radius: 15px; font-family: 'Alfa Slab One', serif; font-size: 18px; cursor: pointer;
+      box-shadow: 4px 4px 0px var(--dark); transition: 0.2s;
     }
-    .clip.selected { background: var(--accent); box-shadow: 6px 6px 0px var(--dark); transform: translateY(-2px); }
+    .action-btn:hover { transform: translateY(-3px); box-shadow: 8px 8px 0px var(--dark); }
 
-    .playhead {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--danger);
-      z-index: 50;
-      pointer-events: none;
+    /* SIMPLE TOAST */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--dark); color: #fff; padding: 12px 25px; border-radius: 12px;
+      font-family: 'Alfa Slab One', serif; font-size: 12px; border: 4px solid var(--info);
+      transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); z-index: 10000;
     }
-    .playhead::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 12px solid var(--danger);
-    }
-
-    /* NEUTRALIZE CHAT BUBBLE */
-    #tas-chat { display: none; }
-
-    /* SCROLLBARS */
-    ::-webkit-scrollbar { width: 10px; height: 10px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--dark); border: 2px solid var(--bg); border-radius: 5px; }
+    .toast.active { transform: translateX(-50%) translateY(0); }
 
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="logo">t.a.s <span>studio</span></div>
-    <div class="header-actions">
-      <button class="btn btn-secondary" onclick="studio.undo()"><i class="fa-solid fa-rotate-left"></i> Undo</button>
-      <button class="btn btn-primary" onclick="studio.export()"><i class="fa-solid fa-film"></i> Export</button>
-    </div>
-  </header>
-
-  <div class="studio-grid">
-    <!-- ASSETS -->
-    <div class="panel">
-      <div class="panel-header">Media Library <i class="fa-solid fa-plus"></i></div>
-      <div class="panel-content">
-        <div class="media-item" draggable="true" ondragstart="studio.onDragMedia(event, 'text')">
-          <i class="fa-solid fa-t" style="color: var(--info)"></i>
-          <div class="media-name">New Text Layer</div>
-        </div>
-        <div class="media-item" draggable="true" ondragstart="studio.onDragMedia(event, 'image')">
-          <i class="fa-solid fa-image" style="color: var(--accent)"></i>
-          <div class="media-name">Placeholder Image</div>
-        </div>
-        <div id="projectAssets"></div>
-      </div>
-    </div>
-
-    <!-- PREVIEW -->
-    <div class="preview-container">
-      <canvas id="mainCanvas"></canvas>
-    </div>
-
-    <!-- INSPECTOR -->
-    <div class="panel">
-      <div class="panel-header">Inspector <i class="fa-solid fa-sliders"></i></div>
-      <div class="panel-content" id="inspectorContent">
-        <div style="text-align:center; color: #ccc; margin-top: 50px;">
-          <i class="fa-solid fa-mouse-pointer" style="font-size: 40px; margin-bottom: 20px; display: block;"></i>
-          <div style="font-weight: 800; font-size: 12px; text-transform: uppercase;">Select a clip to edit properties</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TIMELINE -->
-    <div class="timeline-panel">
-      <div class="timeline-toolbar">
-        <button class="btn btn-secondary" onclick="studio.togglePlayback()">
-          <i class="fa-solid" id="playIcon" class="fa-play"></i>
-        </button>
-        <div class="timecode" id="timecodeDisplay">00:00:00:00</div>
-        <div style="flex:1"></div>
-        <div style="font-size: 10px; font-weight: 900; color: #aaa; text-transform: uppercase;">Zoom</div>
-        <input type="range" id="zoomRange" min="10" max="200" value="100" style="accent-color: var(--accent)">
-      </div>
-      <div class="timeline-container" id="timelineContainer">
-        <div class="playhead" id="playhead"></div>
-        <div id="tracksList"></div>
-      </div>
-    </div>
+  <div class="studio-info">
+    <h1>studio<span>.</span></h1>
+    <p>things-and-shit.org</p>
   </div>
 
-  <script type="module">
-    /**
-     * T.A.S STUDIO ENGINE
-     * High-Performance 2D Web-Based Non-Linear Editor
-     */
+  <div class="viewport" id="mainViewport">
+    
+    <!-- FRAME 1: ASSETS (0,0) -->
+    <div class="frame frame-assets">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Media Library</h2>
+          <i class="fa-solid fa-folder-open"></i>
+        </div>
+        <div class="panel-content">
+          <div class="asset-grid">
+            <div class="asset-item" draggable="true" ondragstart="studio.drag(event, 'text')">
+              <i class="fa-solid fa-font"></i>
+              <span>Text Layer</span>
+            </div>
+            <div class="asset-item" draggable="true" ondragstart="studio.drag(event, 'shape')">
+              <i class="fa-solid fa-shapes"></i>
+              <span>Shape</span>
+            </div>
+            <div class="asset-item" draggable="true" ondragstart="studio.drag(event, 'image')">
+              <i class="fa-solid fa-image"></i>
+              <span>Image</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    class TASStudio {
+    <!-- FRAME 2: STUDIO PREVIEW (1,0) -->
+    <div class="frame frame-studio">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Live Preview</h2>
+          <div style="display:flex; gap:10px;">
+            <button class="nav-btn" style="width:40px; height:40px; font-size:14px;" onclick="studio.togglePlay()"><i class="fa-solid fa-play" id="playIcon"></i></button>
+            <button class="nav-btn" style="width:40px; height:40px; font-size:14px;" onclick="studio.reset()"><i class="fa-solid fa-rotate-left"></i></button>
+          </div>
+        </div>
+        <div class="panel-content" style="background:#111; display:flex; align-items:center; justify-content:center;">
+          <canvas id="mainCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRAME 3: TIMELINE (0,1) -->
+    <div class="frame frame-timeline">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Timeline & Keyframes</h2>
+          <span id="timecode" style="font-family:'Roboto Mono'; font-weight:700; color:var(--accent);">00:00:00</span>
+        </div>
+        <div class="panel-content">
+          <div class="control-group">
+            <label>Scrub Timeline</label>
+            <input type="range" class="slider" id="timelineScrubber" min="0" max="1000" value="0">
+          </div>
+          <div id="layerList"></div>
+          <div style="text-align:center; color:#ccc; padding-top:40px;">
+            <i class="fa-solid fa-layer-group" style="font-size:30px; margin-bottom:10px; display:block;"></i>
+            <span style="font-weight:900; text-transform:uppercase; font-size:11px;">Drag assets here to add layers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FRAME 4: EXPORT (1,1) -->
+    <div class="frame frame-export">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Export & Settings</h2>
+          <i class="fa-solid fa-gear"></i>
+        </div>
+        <div class="panel-content">
+          <div class="control-group">
+            <label>Project Name</label>
+            <input type="text" class="input-box" value="MY AWESOME CLIP">
+          </div>
+          <div class="control-group">
+            <label>Resolution</label>
+            <select class="input-box" style="font-family:'Nunito'">
+              <option>1920x1080 (HD)</option>
+              <option>1080x1920 (Vertical)</option>
+              <option>1080x1080 (Square)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Export Format</label>
+            <div style="display:flex; gap:10px;">
+              <button class="action-btn" style="background:var(--info)" onclick="studio.export('mp4')">MP4</button>
+              <button class="action-btn" style="background:var(--accent)" onclick="studio.export('gif')">GIF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="nav-controls">
+    <button class="nav-btn btn-up" onclick="studio.move(0, -1)"><i class="fa-solid fa-chevron-up"></i></button>
+    <button class="nav-btn btn-left" onclick="studio.move(-1, 0)"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="nav-btn btn-down" onclick="studio.move(0, 1)"><i class="fa-solid fa-chevron-down"></i></button>
+    <button class="nav-btn btn-right" onclick="studio.move(1, 0)"><i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+
+  <div class="toast" id="studioToast">Project Saved</div>
+
+  <script>
+    class StudioEngine {
       constructor() {
+        this.viewport = document.getElementById('mainViewport');
         this.canvas = document.getElementById('mainCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.resolution = { width: 1920, height: 1080 };
-        this.fps = 60;
+        this.pos = { x: 1, y: 0 }; // Start at Studio Preview
         
-        // PROJECT STATE (Normalized JSON)
-        this.state = {
-          duration: 30000, // 30 seconds
-          currentTime: 0,
-          zoom: 1,
-          tracks: [
-            { id: 'track_1', name: 'Graphics', type: 'graphic', clips: [] },
-            { id: 'track_2', name: 'Media', type: 'video', clips: [] }
-          ],
-          selectedClipId: null,
-          isPlaying: false
-        };
-
+        this.isPlaying = false;
+        this.currentTime = 0;
+        
         this.init();
       }
 
       init() {
+        this.updateView();
         this.setupCanvas();
-        this.setupListeners();
-        this.renderLoop();
-        this.updateTimeline();
+        this.loop();
       }
 
       setupCanvas() {
-        this.canvas.width = this.resolution.width;
-        this.canvas.height = this.resolution.height;
+        this.canvas.width = 1920;
+        this.canvas.height = 1080;
       }
 
-      setupListeners() {
-        // Playhead scrubbing
-        const container = document.getElementById('timelineContainer');
-        container.addEventListener('mousedown', (e) => {
-          this.isScrubbing = true;
-          this.handleScrub(e);
-        });
-        window.addEventListener('mousemove', (e) => {
-          if (this.isScrubbing) this.handleScrub(e);
-        });
-        window.addEventListener('mouseup', () => this.isScrubbing = false);
-
-        // Zoom
-        document.getElementById('zoomRange').oninput = (e) => {
-          this.state.zoom = e.target.value / 100;
-          this.updateTimeline();
-        };
-
-        // Resize
-        window.addEventListener('resize', () => this.updateTimeline());
+      move(dx, dy) {
+        this.pos.x = Math.max(0, Math.min(1, this.pos.x + dx));
+        this.pos.y = Math.max(0, Math.min(1, this.pos.y + dy));
+        this.updateView();
       }
 
-      handleScrub(e) {
-        const rect = document.getElementById('timelineContainer').getBoundingClientRect();
-        const scrollLeft = document.getElementById('timelineContainer').scrollLeft;
-        const x = e.clientX - rect.left + scrollLeft;
-        const timePerPixel = 10 / this.state.zoom; // ms per pixel (base 100px = 1s)
-        this.state.currentTime = Math.max(0, Math.min(this.state.duration, x * timePerPixel));
-        this.syncPlayhead();
-      }
-
-      togglePlayback() {
-        this.state.isPlaying = !this.state.isPlaying;
-        document.getElementById('playIcon').className = this.state.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-        if (this.state.isPlaying) this.lastFrameTime = performance.now();
-      }
-
-      syncPlayhead() {
-        const timePerPixel = 10 / this.state.zoom;
-        const x = this.state.currentTime / timePerPixel;
-        document.getElementById('playhead').style.left = `${x}px`;
+      updateView() {
+        const tx = this.pos.x * -100;
+        const ty = this.pos.y * -100;
+        this.viewport.style.transform = `translate(${tx}vw, ${ty}vh)`;
         
-        // Update timecode display
-        const totalSecs = Math.floor(this.state.currentTime / 1000);
-        const ms = Math.floor((this.state.currentTime % 1000) / 10);
-        const mins = Math.floor(totalSecs / 60);
-        const secs = totalSecs % 60;
-        const hours = Math.floor(mins / 60);
-        const displayMins = mins % 60;
-        
-        const pad = (n) => n.toString().padStart(2, '0');
-        document.getElementById('timecodeDisplay').innerText = 
-          `${pad(hours)}:${pad(displayMins)}:${pad(secs)}:${pad(ms)}`;
+        // Highlight active nav buttons
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        if (this.pos.y > 0) document.querySelector('.btn-up').classList.add('active');
+        if (this.pos.y < 1) document.querySelector('.btn-down').classList.add('active');
+        if (this.pos.x > 0) document.querySelector('.btn-left').classList.add('active');
+        if (this.pos.x < 1) document.querySelector('.btn-right').classList.add('active');
       }
 
-      onDragMedia(e, type) {
+      drag(e, type) {
         e.dataTransfer.setData('type', type);
+        this.showToast(`Dragging ${type}...`);
       }
 
-      addClip(type, startTime) {
-        const track = this.state.tracks[0]; // Default to track 1 for now
-        const newClip = {
-          id: 'clip_' + Date.now(),
-          type: type,
-          start: startTime,
-          duration: 5000,
-          name: `New ${type}`,
-          properties: {
-            x: 960, y: 540,
-            scale: 1,
-            rotation: 0,
-            opacity: 1,
-            text: type === 'text' ? 'TAS STUDIO' : '',
-            color: '#ffffff',
-            fontSize: 100
-          },
-          keyframes: []
-        };
-        track.clips.push(newClip);
-        this.selectClip(newClip.id);
-        this.updateTimeline();
+      togglePlay() {
+        this.isPlaying = !this.isPlaying;
+        document.getElementById('playIcon').className = this.isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+        this.showToast(this.isPlaying ? "Playing Timeline" : "Paused");
       }
 
-      selectClip(id) {
-        this.state.selectedClipId = id;
-        this.updateInspector();
-        this.updateTimeline();
+      reset() {
+        this.currentTime = 0;
+        document.getElementById('timelineScrubber').value = 0;
+        this.showToast("Reset to Start");
       }
 
-      updateTimeline() {
-        const list = document.getElementById('tracksList');
-        const timePerPixel = 10 / this.state.zoom;
-        
-        list.innerHTML = this.state.tracks.map(track => `
-          <div class="track" ondragover="event.preventDefault()" ondrop="studio.handleDrop(event, '${track.id}')">
-            ${track.clips.map(clip => {
-              const left = clip.start / timePerPixel;
-              const width = clip.duration / timePerPixel;
-              return `
-                <div class="clip ${this.state.selectedClipId === clip.id ? 'selected' : ''}" 
-                     style="left: ${left}px; width: ${width}px;"
-                     onclick="studio.selectClip('${clip.id}')">
-                  ${clip.name}
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `).join('');
-        this.syncPlayhead();
+      export(fmt) {
+        this.showToast(`Exporting as ${fmt.toUpperCase()}...`);
+        setTimeout(() => this.showToast("Export Ready!"), 2000);
       }
 
-      handleDrop(e, trackId) {
-        e.preventDefault();
-        const type = e.dataTransfer.getData('type');
-        const rect = document.getElementById('timelineContainer').getBoundingClientRect();
-        const scrollLeft = document.getElementById('timelineContainer').scrollLeft;
-        const x = e.clientX - rect.left + scrollLeft;
-        const timePerPixel = 10 / this.state.zoom;
-        this.addClip(type, x * timePerPixel);
+      showToast(msg) {
+        const t = document.getElementById('studioToast');
+        t.innerText = msg.toUpperCase();
+        t.classList.add('active');
+        setTimeout(() => t.classList.remove('active'), 3000);
       }
 
-      updateInspector() {
-        const container = document.getElementById('inspectorContent');
-        const clip = this.findSelectedClip();
-        if (!clip) return;
-
-        container.innerHTML = `
-          <div class="inspector-group">
-            <div class="inspector-label">General</div>
-            <input type="text" class="input-field" value="${clip.name}" oninput="studio.updateClipProp('name', this.value)">
-          </div>
-
-          <div class="inspector-group">
-            <div class="inspector-label">Transform</div>
-            <div class="input-row">
-              <div>
-                <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">POSITION X</div>
-                <input type="number" class="input-field" value="${clip.properties.x}" oninput="studio.updateClipProp('x', parseFloat(this.value))">
-              </div>
-              <div>
-                <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">POSITION Y</div>
-                <input type="number" class="input-field" value="${clip.properties.y}" oninput="studio.updateClipProp('y', parseFloat(this.value))">
-              </div>
-            </div>
-            <div class="input-row">
-              <div>
-                <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">SCALE</div>
-                <input type="number" step="0.1" class="input-field" value="${clip.properties.scale}" oninput="studio.updateClipProp('scale', parseFloat(this.value))">
-              </div>
-              <div>
-                <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">ROTATION</div>
-                <input type="number" class="input-field" value="${clip.properties.rotation}" oninput="studio.updateClipProp('rotation', parseFloat(this.value))">
-              </div>
-            </div>
-          </div>
-
-          ${clip.type === 'text' ? `
-            <div class="inspector-group">
-              <div class="inspector-label">Typography</div>
-              <div style="margin-bottom: 10px;">
-                <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">TEXT CONTENT</div>
-                <textarea class="input-field" style="height: 80px;" oninput="studio.updateClipProp('text', this.value)">${clip.properties.text}</textarea>
-              </div>
-              <div class="input-row">
-                <div>
-                  <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">SIZE</div>
-                  <input type="number" class="input-field" value="${clip.properties.fontSize}" oninput="studio.updateClipProp('fontSize', parseFloat(this.value))">
-                </div>
-                <div>
-                  <div style="font-size: 9px; font-weight: 900; margin-bottom: 5px;">COLOR</div>
-                  <input type="color" class="input-field" value="${clip.properties.color}" oninput="studio.updateClipProp('color', this.value)">
-                </div>
-              </div>
-            </div>
-          ` : ''}
-        `;
-      }
-
-      updateClipProp(prop, val) {
-        const clip = this.findSelectedClip();
-        if (!clip) return;
-        if (['x', 'y', 'scale', 'rotation', 'opacity', 'text', 'color', 'fontSize'].includes(prop)) {
-          clip.properties[prop] = val;
-        } else {
-          clip[prop] = val;
-        }
-        this.updateTimeline();
-      }
-
-      findSelectedClip() {
-        for (const track of this.state.tracks) {
-          const clip = track.clips.find(c => c.id === this.state.selectedClipId);
-          if (clip) return clip;
-        }
-        return null;
-      }
-
-      // DETERMINISTIC RENDERING PIPELINE
-      renderScene(time) {
+      loop() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Draw in Z-order (Reverse tracks)
-        const tracks = [...this.state.tracks].reverse();
-        tracks.forEach(track => {
-          track.clips.forEach(clip => {
-            if (time >= clip.start && time <= clip.start + clip.duration) {
-              this.drawClip(clip, time);
-            }
-          });
-        });
-      }
-
-      drawClip(clip, time) {
-        this.ctx.save();
         
-        const props = clip.properties;
-        this.ctx.translate(props.x, props.y);
-        this.ctx.rotate(props.rotation * Math.PI / 180);
-        this.ctx.scale(props.scale, props.scale);
-        this.ctx.globalAlpha = props.opacity;
-
-        if (clip.type === 'text') {
-          this.ctx.font = `900 ${props.fontSize}px 'Alfa Slab One', serif`;
-          this.ctx.fillStyle = props.color;
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(props.text, 0, 0);
-        } else if (clip.type === 'image') {
-          this.ctx.fillStyle = '#FFB703';
-          this.ctx.fillRect(-100, -100, 200, 200);
-          this.ctx.strokeStyle = '#fff';
-          this.ctx.lineWidth = 10;
-          this.ctx.strokeRect(-100, -100, 200, 200);
+        // Draw grid
+        this.ctx.strokeStyle = '#333';
+        this.ctx.lineWidth = 2;
+        for(let i=0; i<this.canvas.width; i+=100) {
+          this.ctx.beginPath(); this.ctx.moveTo(i, 0); this.ctx.lineTo(i, this.canvas.height); this.ctx.stroke();
+        }
+        for(let i=0; i<this.canvas.height; i+=100) {
+          this.ctx.beginPath(); this.ctx.moveTo(0, i); this.ctx.lineTo(this.canvas.width, i); this.ctx.stroke();
         }
 
+        // Draw animated placeholder
+        const time = Date.now() / 1000;
+        this.ctx.save();
+        this.ctx.translate(960, 540);
+        this.ctx.rotate(Math.sin(time) * 0.1);
+        this.ctx.fillStyle = '#FFB703';
+        this.ctx.font = "900 150px 'Alfa Slab One'";
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText("T.A.S STUDIO", 0, 0);
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 8;
+        this.ctx.strokeText("T.A.S STUDIO", 0, 0);
         this.ctx.restore();
-      }
 
-      renderLoop() {
-        if (this.state.isPlaying) {
-          const now = performance.now();
-          const delta = now - this.lastFrameTime;
-          this.state.currentTime += delta;
-          if (this.state.currentTime > this.state.duration) {
-            this.state.currentTime = 0;
-          }
-          this.lastFrameTime = now;
-          this.syncPlayhead();
+        if (this.isPlaying) {
+          this.currentTime = (this.currentTime + 1) % 1000;
+          document.getElementById('timelineScrubber').value = this.currentTime;
+          
+          const s = Math.floor(this.currentTime / 60);
+          const f = this.currentTime % 60;
+          document.getElementById('timecode').innerText = `00:00:${s.toString().padStart(2,'0')}:${f.toString().padStart(2,'0')}`;
         }
 
-        this.renderScene(this.state.currentTime);
-        requestAnimationFrame(() => this.renderLoop());
-      }
-
-      export() {
-        showToast("Export Initiated via WebCodecs Architecture...");
-        // Placeholder for WebCodecs VideoEncoder implementation
-        setTimeout(() => showToast("Export Complete (Simulation). Check Browser console for metadata."), 2000);
-        console.log("PROJECT JSON STATE:", JSON.stringify(this.state, null, 2));
-      }
-      
-      undo() {
-        showToast("Undo Stack is currently empty.");
+        requestAnimationFrame(() => this.loop());
       }
     }
 
-    // Global simple toast utility
-    function showToast(msg) {
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-        background: #1a1a1a; color: #fff; padding: 15px 30px; border-radius: 15px;
-        font-family: 'Alfa Slab One', serif; font-size: 12px; border: 4px solid #70D6FF;
-        z-index: 9999; box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
-        animation: toast-in 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-      `;
-      toast.innerText = msg.toUpperCase();
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = '0.4s';
-        setTimeout(() => toast.remove(), 400);
-      }, 3000);
-    }
-
-    const style = document.createElement('style');
-    style.innerHTML = `@keyframes toast-in { from { transform: translate(-50%, 100px); } to { transform: translate(-50%, 0); } }`;
-    document.head.appendChild(style);
-
-    window.studio = new TASStudio();
-
+    window.studio = new StudioEngine();
   </script>
+
 </body>
 </html>
 <!-- Made with ❤️ from 4SP -->
