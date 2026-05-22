@@ -344,6 +344,17 @@
         </div>
 
         <div id="endFields" style="display:none;">
+          <div class="grid-2">
+            <div>
+              <label>Background Color</label>
+              <input type="color" id="modalEndBgColor" class="input-box" value="#000000" style="padding:5px; height:50px;">
+            </div>
+            <div>
+              <label>Vertical Offset (Y)</label>
+              <input type="range" id="modalYOffset" class="slider" min="-500" max="500" value="0" style="margin-top:15px; width:100%;">
+            </div>
+          </div>
+
           <label>Links / Socials (Alignable)</label>
           <textarea id="modalLinksText" class="input-box" rows="2" placeholder="youtube.com/4simpleproblems"></textarea>
           
@@ -432,7 +443,7 @@
         this.res = { w: 1920, h: 1080 };
         this.slides = []; 
         this.isAnimating = false;
-        this.currentTime = 0; // Absolute time in ms
+        this.currentTime = 0; 
         this.editingIndex = -1;
         this.draggedItem = null;
         this.recorder = null;
@@ -456,15 +467,12 @@
           const pos = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
           this.seekToPercent(pos);
         };
-
         container.addEventListener('mousedown', (e) => { this.isScrubbing = true; handleScrub(e); });
         window.addEventListener('mousemove', (e) => { if (this.isScrubbing) handleScrub(e); });
         window.addEventListener('mouseup', () => { this.isScrubbing = false; });
       }
 
-      getTotalDuration() {
-        return this.slides.reduce((acc, s) => acc + s.duration + 700, 0);
-      }
+      getTotalDuration() { return this.slides.reduce((acc, s) => acc + s.duration + 700, 0); }
 
       seekToPercent(percent) {
         const total = this.getTotalDuration();
@@ -489,26 +497,7 @@
 
       addNewSlide(type) {
         this.slides.push({
-          type: type,
-          direction: 'left',
-          duration: 3000,
-          layout: 'center',
-          alignment: 'tl',
-          mainText: 'NEW SLIDE',
-          descText: '',
-          linksText: '',
-          linksAlign: 'bl',
-          badgeAngle: -4,
-          badgeBorder: 5,
-          badgeRound: 15,
-          fitting: 'floating',
-          outline: 'on',
-          overlayText: '',
-          overlayTextColor: '#ffffff',
-          overlayBgColor: '#000000',
-          overlayPos: 'bottom',
-          overlayOpacity: 0.4,
-          img: null
+          type: type, direction: 'left', duration: 3000, layout: 'center', alignment: 'tl', mainText: 'NEW SLIDE', descText: '', linksText: '', linksAlign: 'bl', bgColor: '#000000', yOffset: 0, badgeAngle: -4, badgeBorder: 5, badgeRound: 15, fitting: 'floating', outline: 'on', overlayText: '', overlayTextColor: '#ffffff', overlayBgColor: '#000000', overlayPos: 'bottom', overlayOpacity: 0.4, img: null
         });
         this.updateSlideList();
         this.openEdit(this.slides.length - 1);
@@ -544,9 +533,7 @@
             const data = JSON.parse(event.target.result);
             this.slides = data.map(s => {
               if (s.type === 'image' && s.imgData) {
-                const img = new Image();
-                img.src = s.imgData;
-                s.img = img;
+                const img = new Image(); img.src = s.imgData; s.img = img;
               }
               return s;
             });
@@ -560,30 +547,17 @@
 
       updateSlideList() {
         const list = document.getElementById('slideList');
-        if (this.slides.length === 0) {
-          list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES</div>`;
-          return;
-        }
-        
-        let activeIdx = -1;
-        let elapsed = 0;
+        if (this.slides.length === 0) { list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES</div>`; return; }
+        let activeIdx = -1; let elapsed = 0;
         for(let i=0; i<this.slides.length; i++) {
           const total = this.slides[i].duration + 700;
           if (this.currentTime >= elapsed && this.currentTime < elapsed + total) { activeIdx = i; break; }
           elapsed += total;
         }
-
         list.innerHTML = this.slides.map((s, i) => `
-          <div class="slide-item ${activeIdx === i ? 'active' : ''}" 
-               draggable="true" 
-               onclick="studio.previewSlide(${i})"
-               ondragstart="studio.handleDragStart(event, ${i})"
-               ondragover="event.preventDefault()"
-               ondrop="studio.handleDrop(event, ${i})">
+          <div class="slide-item ${activeIdx === i ? 'active' : ''}" draggable="true" onclick="studio.previewSlide(${i})" ondragstart="studio.handleDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="studio.handleDrop(event, ${i})">
             <div class="slide-index">${i + 1}</div>
-            <div class="slide-type-icon">
-              <i class="fa-solid ${s.type === 'image' ? 'fa-image' : 'fa-font'}"></i>
-            </div>
+            <div class="slide-type-icon"><i class="fa-solid ${s.type === 'image' ? 'fa-image' : 'fa-font'}"></i></div>
             <div class="slide-controls">
               <i class="fa-solid fa-pen-to-square action-icon edit" onclick="event.stopPropagation(); studio.openEdit(${i})"></i>
               <i class="fa-solid fa-trash-can action-icon" onclick="event.stopPropagation(); studio.removeSlide(${i})"></i>
@@ -616,6 +590,8 @@
           document.getElementById('modalDescText').value = s.descText;
           document.getElementById('modalLinksText').value = s.linksText || '';
           document.getElementById('modalLinksAlign').value = s.linksAlign || 'bl';
+          document.getElementById('modalEndBgColor').value = s.bgColor || '#000000';
+          document.getElementById('modalYOffset').value = s.yOffset || 0;
           document.getElementById('modalBadgeAngle').value = s.badgeAngle || -4;
           document.getElementById('modalBadgeBorder').value = s.badgeBorder || 5;
           document.getElementById('modalBadgeRound').value = s.badgeRound || 15;
@@ -644,6 +620,8 @@
           s.descText = document.getElementById('modalDescText').value;
           s.linksText = document.getElementById('modalLinksText').value;
           s.linksAlign = document.getElementById('modalLinksAlign').value;
+          s.bgColor = document.getElementById('modalEndBgColor').value;
+          s.yOffset = parseFloat(document.getElementById('modalYOffset').value);
           s.badgeAngle = parseFloat(document.getElementById('modalBadgeAngle').value);
           s.badgeBorder = parseFloat(document.getElementById('modalBadgeBorder').value);
           s.badgeRound = parseInt(document.getElementById('modalBadgeRound').value);
@@ -663,12 +641,12 @@
         this.closeModal();
       }
 
-      wrapText(text, maxWidth, baseSize) {
+      wrapText(text, maxWidth, baseSize, font = 'Alfa Slab One') {
         if (!text) return [];
         const words = text.split(' ');
         const lines = [];
         let currentLine = words[0];
-        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+        this.ctx.font = `900 ${baseSize}px '${font}'`;
         for (let i = 1; i < words.length; i++) {
           const word = words[i];
           const width = this.ctx.measureText(currentLine + " " + word).width;
@@ -681,7 +659,7 @@
 
       drawTextContent(slide, ox, oy) {
         this.ctx.save();
-        this.ctx.translate(ox, oy);
+        this.ctx.translate(ox, oy + (slide.yOffset || 0));
 
         if (slide.layout === 'center') {
           this.ctx.fillStyle = '#1a1a1a';
@@ -754,12 +732,12 @@
           this.ctx.restore();
 
           if (slide.linksText) {
-            const lSize = 35;
+            const lSize = 45;
             const lPadding = 60;
             const lMaxWidth = this.res.w - (lPadding * 2);
-            this.ctx.font = `900 ${lSize}px 'Nunito'`;
-            const lLines = this.wrapText(slide.linksText, lMaxWidth, lSize);
-            const lTotalH = lLines.length * lSize;
+            this.ctx.font = `900 ${lSize}px 'Nunito'`; 
+            const lLines = slide.linksText.split('\n');
+            const lTotalH = lLines.length * lSize * 1.2;
             let lx, ly;
             const lal = slide.linksAlign;
             this.ctx.textBaseline = 'top';
@@ -767,9 +745,16 @@
             if (lal === 'tr') { lx = this.res.w - lPadding; ly = lPadding; this.ctx.textAlign = 'right'; }
             if (lal === 'bl') { lx = lPadding; ly = this.res.h - lPadding - lTotalH; this.ctx.textAlign = 'left'; }
             if (lal === 'br') { lx = this.res.w - lPadding; ly = this.res.h - lPadding - lTotalH; this.ctx.textAlign = 'right'; }
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.globalAlpha = 0.6;
-            lLines.forEach((line, i) => { this.ctx.fillText(line, lx, ly + (i * lSize)); });
+            
+            this.ctx.save();
+            this.ctx.shadowOffsetX = 3;
+            this.ctx.shadowOffsetY = 3;
+            this.ctx.shadowColor = '#ffffff';
+            this.ctx.shadowBlur = 0;
+            this.ctx.fillStyle = '#1a1a1a';
+            this.ctx.globalAlpha = 0.8;
+            lLines.forEach((line, i) => { this.ctx.fillText(line, lx, ly + (i * lSize * 1.2)); });
+            this.ctx.restore();
           }
         }
         this.ctx.restore();
@@ -779,10 +764,8 @@
         const img = slide.img;
         let dw, dh, dx, dy;
         const mode = slide.fitting;
-
         this.ctx.save();
         this.ctx.translate(ox, oy);
-
         if (mode === 'floating') {
           const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
           dw = img.width * ratio; dh = img.height * ratio;
@@ -802,9 +785,7 @@
         } else if (mode === 'stretch') {
           dw = this.res.w; dh = this.res.h; dx = 0; dy = 0;
         }
-
         this.ctx.drawImage(img, dx, dy, dw, dh);
-
         if (slide.overlayText) {
           const barH = 150;
           let barY = this.res.h - barH;
@@ -866,7 +847,7 @@
       }
 
       drawFrame(slide, ox, oy) {
-        this.ctx.fillStyle = slide.layout === 'end' ? '#000000' : '#FFB703';
+        this.ctx.fillStyle = slide.layout === 'end' ? slide.bgColor || '#000000' : '#FFB703';
         this.ctx.fillRect(ox, oy, this.res.w, this.res.h);
         if (slide.type === 'text') this.drawTextContent(slide, ox, oy);
         else this.drawImageContent(slide, ox, oy);
