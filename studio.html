@@ -14,7 +14,7 @@
       --panel-bg: #ffffff;
       --dark: #1a1a1a;
       --border: 5px solid var(--dark);
-      --shadow: 8px 8px 0px var(--dark);
+      --shadow: 8px 8px 0px #e0e0e0;
       --accent: #70D6FF;
       --danger: #FF0054;
     }
@@ -133,6 +133,7 @@
       border: 3px solid var(--dark);
       border-radius: 12px;
       padding: 10px;
+      position: relative;
     }
     .slide-thumb {
       width: 60px;
@@ -141,8 +142,37 @@
       border-radius: 6px;
       object-fit: cover;
       border: 2px solid var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
     }
     .slide-info { flex: 1; font-weight: 800; font-size: 11px; text-transform: uppercase; }
+    
+    .slide-actions { display: flex; flex-direction: column; gap: 4px; }
+    .action-mini {
+      background: #fff;
+      border: 2px solid var(--dark);
+      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .action-mini:hover { background: var(--accent); }
+
+    .type-badge {
+      font-family: 'Alfa Slab One', serif;
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--dark);
+      background: var(--accent);
+      margin-left: 5px;
+    }
 
     /* PREVIEW AREA */
     .preview {
@@ -211,13 +241,18 @@ WORLD</textarea>
       </div>
 
       <div class="control-group">
-        <label>Content</label>
+        <label>Content Sequence</label>
         <div class="slide-list" id="slideList">
-          <div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO IMAGES ADDED</div>
+          <div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES ADDED</div>
         </div>
-        <button class="btn-action btn-blue" style="margin-top:15px;" onclick="document.getElementById('fileInput').click()">
-          <i class="fa-solid fa-plus"></i> ADD IMAGES
-        </button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+          <button class="btn-action btn-blue" onclick="studio.addTextSlide()">
+            <i class="fa-solid fa-font"></i> + TEXT
+          </button>
+          <button class="btn-action btn-blue" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-image"></i> + IMG
+          </button>
+        </div>
         <input type="file" id="fileInput" accept="image/*" multiple onchange="studio.handleUpload(event)">
       </div>
 
@@ -246,16 +281,14 @@ WORLD</textarea>
         this.ctx = this.canvas.getContext('2d');
         this.res = { w: 1920, h: 1080 };
         
-        this.slides = []; // { type: 'image', img: Image, name: string }
+        this.slides = []; // { type: 'image'|'text', img?: Image, text?: string, name: string }
         this.direction = 'left';
         this.isAnimating = false;
         this.phase = 'idle'; // 'intro', 'slides', 'idle'
         
         this.anim = {
           t: 0,
-          currentSlideIndex: -1,
-          offsetX: 0,
-          offsetY: 0
+          currentSlideIndex: -1
         };
 
         this.init();
@@ -270,6 +303,14 @@ WORLD</textarea>
       setDirection(dir) {
         this.direction = dir;
         this.showToast(`SLIDE DIRECTION: ${dir.toUpperCase()}`);
+      }
+
+      addTextSlide() {
+        const text = prompt("Enter text for slide:", "NEW SLIDE");
+        if (text) {
+          this.slides.push({ type: 'text', text: text, name: text.substring(0, 15) });
+          this.updateSlideList();
+        }
       }
 
       handleUpload(e) {
@@ -292,16 +333,38 @@ WORLD</textarea>
       updateSlideList() {
         const list = document.getElementById('slideList');
         if (this.slides.length === 0) {
-          list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO IMAGES ADDED</div>`;
+          list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES ADDED</div>`;
           return;
         }
-        list.innerHTML = this.slides.map((s, i) => `
-          <div class="slide-item">
-            <img src="${s.img.src}" class="slide-thumb">
-            <div class="slide-info">${s.name}</div>
-            <i class="fa-solid fa-trash-can" style="cursor:pointer; color:var(--danger)" onclick="studio.removeSlide(${i})"></i>
-          </div>
-        `).join('');
+        list.innerHTML = this.slides.map((s, i) => {
+          const visual = s.type === 'image' 
+            ? `<img src="${s.img.src}" class="slide-thumb">`
+            : `<div class="slide-thumb"><i class="fa-solid fa-font"></i></div>`;
+          
+          return `
+            <div class="slide-item">
+              ${visual}
+              <div class="slide-info">
+                ${s.name}
+                <span class="type-badge">${s.type}</span>
+              </div>
+              <div class="slide-actions">
+                <div class="action-mini" onclick="studio.moveSlide(${i}, -1)"><i class="fa-solid fa-chevron-up"></i></div>
+                <div class="action-mini" onclick="studio.moveSlide(${i}, 1)"><i class="fa-solid fa-chevron-down"></i></div>
+              </div>
+              <i class="fa-solid fa-trash-can" style="cursor:pointer; color:var(--danger); margin-left: 10px;" onclick="studio.removeSlide(${i})"></i>
+            </div>
+          `;
+        }).join('');
+      }
+
+      moveSlide(index, delta) {
+        const newIndex = index + delta;
+        if (newIndex < 0 || newIndex >= this.slides.length) return;
+        const temp = this.slides[index];
+        this.slides[index] = this.slides[newIndex];
+        this.slides[newIndex] = temp;
+        this.updateSlideList();
       }
 
       removeSlide(index) {
@@ -333,33 +396,15 @@ WORLD</textarea>
         setTimeout(() => t.classList.remove('active'), 2500);
       }
 
-      // Easing function (Neo-Brutalist hard slide)
       ease(t) {
         return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       }
 
-      drawIntro(t) {
-        const lines = document.getElementById('titleInput').value.split('\n');
-        const fontSize = 240;
-        
-        this.ctx.fillStyle = '#FFB703';
-        this.ctx.fillRect(0, 0, this.res.w, this.res.h);
-
-        // Calculate offset based on direction and time
-        // Intro stays for a bit, then slides out
-        let progress = 0;
-        if (t > 0.5) {
-          progress = this.ease((t - 0.5) * 2);
-        }
-
-        let ox = 0, oy = 0;
-        if (this.direction === 'left') ox = -progress * this.res.w;
-        if (this.direction === 'right') ox = progress * this.res.w;
-        if (this.direction === 'up') oy = -progress * this.res.h;
-        if (this.direction === 'down') oy = progress * this.res.h;
-
+      drawTextContent(text, ox, oy, scale = 1, fontSize = 180) {
+        const lines = text.split('\n');
         this.ctx.save();
         this.ctx.translate(ox, oy);
+        this.ctx.scale(scale, scale);
         
         this.ctx.fillStyle = '#1a1a1a';
         this.ctx.font = `900 ${fontSize}px 'Alfa Slab One'`;
@@ -370,10 +415,56 @@ WORLD</textarea>
           const y = (this.res.h / 2) + (i - (lines.length - 1) / 2) * (fontSize * 0.9);
           this.ctx.fillText(line, this.res.w / 2, y);
         });
-
         this.ctx.restore();
+      }
 
-        // If intro finished sliding, move to next slide
+      drawImageCentered(img, ox, oy) {
+        const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
+        const nw = img.width * ratio;
+        const nh = img.height * ratio;
+        
+        this.ctx.save();
+        this.ctx.translate(ox, oy);
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.fillRect((this.res.w - nw) / 2 - 10, (this.res.h - nh) / 2 - 10, nw + 20, nh + 20);
+        this.ctx.drawImage(img, (this.res.w - nw) / 2, (this.res.h - nh) / 2, nw, nh);
+        this.ctx.restore();
+      }
+
+      drawSlideContent(slide, ox, oy) {
+        if (slide.type === 'text') {
+          this.drawTextContent(slide.text, ox, oy);
+        } else {
+          this.drawImageCentered(slide.img, ox, oy);
+        }
+      }
+
+      drawIntro(t) {
+        this.ctx.fillStyle = '#FFB703';
+        this.ctx.fillRect(0, 0, this.res.w, this.res.h);
+
+        let progress = 0;
+        if (t > 0.5) progress = this.ease((t - 0.5) * 2);
+
+        let ox = 0, oy = 0;
+        if (this.direction === 'left') ox = -progress * this.res.w;
+        if (this.direction === 'right') ox = progress * this.res.w;
+        if (this.direction === 'up') oy = -progress * this.res.h;
+        if (this.direction === 'down') oy = progress * this.res.h;
+
+        // Intro Text
+        this.drawTextContent(document.getElementById('titleInput').value, ox, oy, 1, 240);
+
+        // Next Slide pushing in
+        if (progress > 0 && this.slides.length > 0) {
+          let nx = ox, ny = oy;
+          if (this.direction === 'left') nx += this.res.w;
+          if (this.direction === 'right') nx -= this.res.w;
+          if (this.direction === 'up') ny += this.res.h;
+          if (this.direction === 'down') ny -= this.res.h;
+          this.drawSlideContent(this.slides[0], nx, ny);
+        }
+
         if (t >= 1) {
           if (this.slides.length > 0) {
             this.phase = 'slides';
@@ -393,9 +484,7 @@ WORLD</textarea>
         this.ctx.fillRect(0, 0, this.res.w, this.res.h);
 
         let progress = 0;
-        if (t > 0.7) {
-          progress = this.ease((t - 0.7) / 0.3);
-        }
+        if (t > 0.7) progress = this.ease((t - 0.7) / 0.3);
 
         let ox = 0, oy = 0;
         if (this.direction === 'left') ox = -progress * this.res.w;
@@ -403,24 +492,17 @@ WORLD</textarea>
         if (this.direction === 'up') oy = -progress * this.res.h;
         if (this.direction === 'down') oy = progress * this.res.h;
 
-        // Draw Current Slide
-        this.ctx.save();
-        this.ctx.translate(ox, oy);
-        this.drawImageCentered(slide.img);
-        this.ctx.restore();
+        // Current Slide
+        this.drawSlideContent(slide, ox, oy);
 
-        // Draw Next Slide sliding in
+        // Next Slide pushing in
         if (nextSlide && progress > 0) {
-          this.ctx.save();
-          let nx = 0, ny = 0;
-          if (this.direction === 'left') nx = ox + this.res.w;
-          if (this.direction === 'right') nx = ox - this.res.w;
-          if (this.direction === 'up') ny = oy + this.res.h;
-          if (this.direction === 'down') ny = oy - this.res.h;
-          
-          this.ctx.translate(nx, ny);
-          this.drawImageCentered(nextSlide.img);
-          this.ctx.restore();
+          let nx = ox, ny = oy;
+          if (this.direction === 'left') nx += this.res.w;
+          if (this.direction === 'right') nx -= this.res.w;
+          if (this.direction === 'up') ny += this.res.h;
+          if (this.direction === 'down') ny -= this.res.h;
+          this.drawSlideContent(nextSlide, nx, ny);
         }
 
         if (t >= 1) {
@@ -433,32 +515,11 @@ WORLD</textarea>
         }
       }
 
-      drawImageCentered(img) {
-        const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
-        const nw = img.width * ratio;
-        const nh = img.height * ratio;
-        
-        // Draw frame around image
-        this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.fillRect((this.res.w - nw) / 2 - 10, (this.res.h - nh) / 2 - 10, nw + 20, nh + 20);
-        
-        this.ctx.drawImage(img, (this.res.w - nw) / 2, (this.res.h - nh) / 2, nw, nh);
-      }
-
       renderLoop() {
         this.ctx.clearRect(0, 0, this.res.w, this.res.h);
-
-        if (this.phase === 'idle') {
-          // Show static intro frame
-          this.drawIntro(0);
-        } else if (this.phase === 'intro') {
-          this.anim.t += 0.01;
-          this.drawIntro(this.anim.t);
-        } else if (this.phase === 'slides') {
-          this.anim.t += 0.005;
-          this.drawSlide(this.anim.currentSlideIndex, this.anim.t);
-        }
-
+        if (this.phase === 'idle') this.drawIntro(0);
+        else if (this.phase === 'intro') { this.anim.t += 0.01; this.drawIntro(this.anim.t); }
+        else if (this.phase === 'slides') { this.anim.t += 0.005; this.drawSlide(this.anim.currentSlideIndex, this.anim.t); }
         requestAnimationFrame(() => this.renderLoop());
       }
     }
