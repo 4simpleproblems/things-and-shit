@@ -659,7 +659,8 @@
 
       drawTextContent(slide, ox, oy) {
         this.ctx.save();
-        this.ctx.translate(ox, oy + (slide.yOffset || 0));
+        this.ctx.translate(ox, oy);
+        const yOff = slide.yOffset || 0;
 
         if (slide.layout === 'center') {
           this.ctx.fillStyle = '#1a1a1a';
@@ -673,7 +674,7 @@
           this.ctx.textBaseline = 'middle';
           const totalH = lines.length * baseSize;
           lines.forEach((line, i) => {
-            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
+            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2 + yOff;
             this.ctx.fillText(line, this.res.w / 2, y);
           });
         } else if (slide.layout === 'intro-alignable') {
@@ -690,10 +691,10 @@
           this.ctx.textBaseline = 'top';
           let tx, ty;
           const al = slide.alignment;
-          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
-          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
-          if (al === 'bl') { tx = padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'left'; }
-          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing; this.ctx.textAlign = 'right'; }
+          if (al === 'tl') { tx = padding; ty = padding + yOff; this.ctx.textAlign = 'left'; }
+          if (al === 'tr') { tx = this.res.w - padding; ty = padding + yOff; this.ctx.textAlign = 'right'; }
+          if (al === 'bl') { tx = padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing + yOff; this.ctx.textAlign = 'left'; }
+          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - totalTitleH - totalDescH - spacing + yOff; this.ctx.textAlign = 'right'; }
           this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
           this.ctx.globalAlpha = 1.0;
           titleLines.forEach((line, i) => { this.ctx.fillText(line, tx, ty + (i * titleSize)); });
@@ -710,7 +711,7 @@
           const bw = tw + px * 2, bh = th + py * 2;
 
           this.ctx.save();
-          this.ctx.translate(this.res.w/2, this.res.h/2);
+          this.ctx.translate(this.res.w/2, this.res.h/2 + yOff);
           this.ctx.rotate(slide.badgeAngle * Math.PI / 180);
           this.ctx.fillStyle = '#1a1a1a';
           this.ctx.globalAlpha = 0.2;
