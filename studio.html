@@ -260,6 +260,7 @@
           <div class="scrubber-handle" id="scrubberHandle"></div>
         </div>
         <div id="timecodeDisplay" style="color:#fff; font-family:'Roboto Mono'; font-weight:900; font-size:12px; min-width:80px;">00:00</div>
+        <button class="playback-btn" onclick="studio.toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
       </div>
     </div>
   </div>
@@ -742,6 +743,17 @@
            this.drawAtTime(this.currentTime);
         }
         requestAnimationFrame(() => this.renderLoop());
+      }
+      
+      toggleFullscreen() {
+        const preview = document.querySelector('.preview');
+        if (!document.fullscreenElement) {
+          preview.requestFullscreen().catch(err => {
+            this.showToast("Error enabling fullscreen");
+          });
+        } else {
+          document.exitFullscreen();
+        }
       }
       
       // Inherit other methods...
