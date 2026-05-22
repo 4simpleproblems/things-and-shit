@@ -219,9 +219,14 @@
       </div>
 
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="btn-action btn-pink" onclick="studio.startSequence()">
-          <i class="fa-solid fa-play"></i> PLAY VIDEO
-        </button>
+        <div class="grid-2">
+          <button class="btn-action btn-pink" onclick="studio.startSequence()">
+            <i class="fa-solid fa-play"></i> PLAY
+          </button>
+          <button class="btn-action btn-blue" onclick="studio.openExport()">
+            <i class="fa-solid fa-file-export"></i> EXPORT
+          </button>
+        </div>
         <button class="btn-action btn-white" onclick="studio.reset()">
           <i class="fa-solid fa-rotate-left"></i> RESET
         </button>
@@ -233,19 +238,51 @@
     </div>
   </div>
 
+  <!-- EXPORT MODAL -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content">
+      <h2 style="font-family:'Alfa Slab One'; margin-bottom:20px; text-transform:uppercase;">Export & Save</h2>
+      
+      <div class="control-group">
+        <label>Project File</label>
+        <div class="grid-2">
+          <button class="btn-action btn-white" onclick="studio.downloadProject()">.TAS-STUDIO</button>
+          <button class="btn-action btn-white" onclick="studio.copyProject()">COPY JSON</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Video Export</label>
+        <div class="grid-2">
+          <button class="btn-action btn-blue" onclick="studio.exportVideo('webm')">WEBM</button>
+          <button class="btn-action btn-blue" onclick="studio.exportVideo('mp4')">MP4</button>
+        </div>
+        <p style="font-size:10px; font-weight:800; color:#aaa; margin-top:10px; text-align:center;">Recording starts immediately upon selection.</p>
+      </div>
+
+      <button class="btn-action btn-white" onclick="studio.closeExport()">Close</button>
+    </div>
+  </div>
+
   <!-- SLIDE EDITOR MODAL -->
   <div class="modal" id="editModal">
     <div class="modal-content">
       <h2 style="font-family:'Alfa Slab One'; margin-bottom:20px; text-transform:uppercase;">Slide Properties</h2>
       
-      <div class="control-group">
-        <label>Transition Direction</label>
-        <select id="modalDirection" class="select-box">
-          <option value="up">UP</option>
-          <option value="down">DOWN</option>
-          <option value="left">LEFT</option>
-          <option value="right">RIGHT</option>
-        </select>
+      <div class="grid-2">
+        <div class="control-group">
+          <label>Direction</label>
+          <select id="modalDirection" class="select-box">
+            <option value="up">UP</option>
+            <option value="down">DOWN</option>
+            <option value="left">LEFT</option>
+            <option value="right">RIGHT</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Stay (ms)</label>
+          <input type="number" id="modalDuration" class="input-box" step="500" min="500">
+        </div>
       </div>
 
       <div id="textOnlyFields">
@@ -301,7 +338,6 @@
   <div class="toast" id="studioToast">READY</div>
 
   <script>
-    class TASVideoStudio {
       constructor() {
         this.canvas = document.getElementById('previewCanvas');
         this.ctx = this.canvas.getContext('2d');
@@ -312,6 +348,8 @@
         this.t = 0;
         this.editingIndex = -1;
         this.draggedItem = null;
+        this.recorder = null;
+        this.recordedChunks = [];
 
         this.init();
       }
@@ -326,6 +364,7 @@
         this.slides.push({
           type: type,
           direction: 'left',
+          duration: 3000, // 3 seconds default
           layout: 'center',
           alignment: 'tl',
           mainText: 'NEW SLIDE',
@@ -351,6 +390,7 @@
                 type: 'image',
                 img: img,
                 direction: 'left',
+                duration: 3000,
                 fitting: 'floating',
                 outline: 'on',
                 overlayText: ''
@@ -367,52 +407,12 @@
         });
       }
 
-      updateSlideList() {
-        const list = document.getElementById('slideList');
-        if (this.slides.length === 0) {
-          list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES</div>`;
-          return;
-        }
-        list.innerHTML = this.slides.map((s, i) => `
-          <div class="slide-item ${this.playIndex === i ? 'active' : ''}" 
-               draggable="true" 
-               ondragstart="studio.handleDragStart(event, ${i})"
-               ondragover="event.preventDefault()"
-               ondrop="studio.handleDrop(event, ${i})">
-            <div class="slide-index">${i + 1}</div>
-            <div class="slide-type-icon">
-              <i class="fa-solid ${s.type === 'image' ? 'fa-image' : 'fa-font'}"></i>
-            </div>
-            <div class="slide-controls">
-              <i class="fa-solid fa-pen-to-square action-icon edit" onclick="studio.openEdit(${i})"></i>
-              <i class="fa-solid fa-trash-can action-icon" onclick="studio.removeSlide(${i})"></i>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      handleDragStart(e, i) {
-        this.draggedItem = i;
-        e.target.classList.add('dragging');
-      }
-
-      handleDrop(e, i) {
-        e.preventDefault();
-        const item = this.slides.splice(this.draggedItem, 1)[0];
-        this.slides.splice(i, 0, item);
-        this.updateSlideList();
-      }
-
-      removeSlide(index) {
-        this.slides.splice(index, 1);
-        this.updateSlideList();
-      }
-
       openEdit(index) {
         const s = this.slides[index];
         this.editingIndex = index;
         document.getElementById('editModal').classList.add('active');
         document.getElementById('modalDirection').value = s.direction;
+        document.getElementById('modalDuration').value = s.duration;
 
         if (s.type === 'text') {
           document.getElementById('textOnlyFields').style.display = 'block';
@@ -431,16 +431,10 @@
         }
       }
 
-      toggleModalFields() {
-        const layout = document.getElementById('modalLayout').value;
-        document.getElementById('alignableFields').style.display = layout === 'intro-alignable' ? 'block' : 'none';
-      }
-
-      closeModal() { document.getElementById('editModal').classList.remove('active'); }
-
       saveEdit() {
         const s = this.slides[this.editingIndex];
         s.direction = document.getElementById('modalDirection').value;
+        s.duration = parseInt(document.getElementById('modalDuration').value) || 3000;
         if (s.type === 'text') {
           s.mainText = document.getElementById('modalMainText').value;
           s.descText = document.getElementById('modalDescText').value;
@@ -455,6 +449,63 @@
         this.closeModal();
       }
 
+      openExport() { document.getElementById('exportModal').classList.add('active'); }
+      closeExport() { document.getElementById('exportModal').classList.remove('active'); }
+
+      copyProject() {
+        const data = JSON.stringify(this.slides.map(s => {
+          const {img, ...rest} = s;
+          if (s.type === 'image') rest.imgData = img.src;
+          return rest;
+        }));
+        navigator.clipboard.writeText(data);
+        this.showToast("JSON COPIED TO CLIPBOARD");
+      }
+
+      downloadProject() {
+        const data = JSON.stringify(this.slides.map(s => {
+          const {img, ...rest} = s;
+          if (s.type === 'image') rest.imgData = img.src;
+          return rest;
+        }));
+        const blob = new Blob([data], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "project.tas-studio";
+        a.click();
+        this.showToast("DOWNLOADED .TAS-STUDIO");
+      }
+
+      async exportVideo(type) {
+        this.closeExport();
+        this.showToast(`RECORDING ${type.toUpperCase()}...`);
+        
+        const stream = this.canvas.captureStream(60);
+        const mimeType = type === 'webm' ? 'video/webm;codecs=vp9' : 'video/mp4';
+        
+        try {
+          this.recordedChunks = [];
+          this.recorder = new MediaRecorder(stream, { mimeType });
+          this.recorder.ondataavailable = (e) => { if (e.data.size > 0) this.recordedChunks.push(e.data); };
+          this.recorder.onstop = () => {
+            const blob = new Blob(this.recordedChunks, { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tas-video.${type}`;
+            a.click();
+            this.showToast("EXPORT COMPLETE");
+          };
+          
+          this.startSequence();
+          this.recorder.start();
+        } catch(e) {
+          this.showToast("FORMAT NOT SUPPORTED BY BROWSER");
+          console.error(e);
+        }
+      }
+
       startSequence() {
         if (this.slides.length === 0) return this.showToast("ADD SLIDES FIRST");
         this.isAnimating = true;
@@ -462,147 +513,6 @@
         this.t = 0;
         this.updateSlideList();
       }
-
-      reset() {
-        this.isAnimating = false;
-        this.playIndex = -1;
-        this.t = 0;
-        this.updateSlideList();
-      }
-
-      showToast(msg) {
-        const t = document.getElementById('studioToast');
-        t.innerText = msg.toUpperCase();
-        t.classList.add('active');
-        setTimeout(() => t.classList.remove('active'), 2500);
-      }
-
-      wrapText(text, maxWidth, baseSize) {
-        const words = text.split(' ');
-        const lines = [];
-        let currentLine = words[0];
-
-        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
-
-        for (let i = 1; i < words.length; i++) {
-          const word = words[i];
-          const width = this.ctx.measureText(currentLine + " " + word).width;
-          if (width < maxWidth) {
-            currentLine += " " + word;
-          } else {
-            lines.push(currentLine);
-            currentLine = word;
-          }
-        }
-        lines.push(currentLine);
-        return lines;
-      }
-
-      drawTextContent(slide, ox, oy) {
-        this.ctx.save();
-        this.ctx.translate(ox, oy);
-        this.ctx.fillStyle = '#1a1a1a';
-
-        if (slide.layout === 'center') {
-          let baseSize = 200;
-          const maxWidth = this.res.w * 0.8;
-          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          
-          // Shrink if too many lines
-          if (lines.length > 4) {
-            baseSize = 120;
-            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          }
-          if (lines.length > 8) {
-            baseSize = 80;
-            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          }
-
-          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          
-          const totalH = lines.length * baseSize;
-          lines.forEach((line, i) => {
-            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
-            this.ctx.fillText(line, this.res.w / 2, y);
-          });
-        } else {
-          // Alignable
-          const titleSize = 100;
-          const descSize = 45;
-          const padding = 100;
-          const spacing = 30;
-          
-          this.ctx.textBaseline = 'top';
-          let tx, ty;
-          const al = slide.alignment;
-
-          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
-          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
-          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
-          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
-
-          this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
-          this.ctx.globalAlpha = 1.0;
-          this.ctx.fillText(slide.mainText, tx, ty);
-          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
-          this.ctx.globalAlpha = 0.5;
-          this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
-        }
-        this.ctx.restore();
-      }
-
-      drawImageContent(slide, ox, oy) {
-        const img = slide.img;
-        let dw, dh, dx, dy;
-        const mode = slide.fitting;
-
-        this.ctx.save();
-        this.ctx.translate(ox, oy);
-
-        if (mode === 'floating') {
-          const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
-          dw = img.width * ratio; dh = img.height * ratio;
-          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
-          if (slide.outline === 'on') {
-            this.ctx.fillStyle = '#1a1a1a';
-            this.ctx.fillRect(dx - 10, dy - 10, dw + 20, dh + 20);
-          }
-        } else if (mode === 'cover') {
-          const ratio = Math.max(this.res.w / img.width, this.res.h / img.height);
-          dw = img.width * ratio; dh = img.height * ratio;
-          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
-        } else if (mode === 'contain') {
-          const ratio = Math.min(this.res.w / img.width, this.res.h / img.height);
-          dw = img.width * ratio; dh = img.height * ratio;
-          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
-        } else if (mode === 'stretch') {
-          dw = this.res.w; dh = this.res.h; dx = 0; dy = 0;
-        }
-
-        this.ctx.drawImage(img, dx, dy, dw, dh);
-
-        if (slide.overlayText) {
-          this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
-          this.ctx.fillRect(0, this.res.h - 150, this.res.w, 150);
-          this.ctx.fillStyle = '#fff';
-          this.ctx.font = "900 60px 'Alfa Slab One'";
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(slide.overlayText.toUpperCase(), this.res.w / 2, this.res.h - 75);
-        }
-        this.ctx.restore();
-      }
-
-      drawFrame(slide, ox, oy) {
-        this.ctx.fillStyle = '#FFB703';
-        this.ctx.fillRect(ox, oy, this.res.w, this.res.h);
-        if (slide.type === 'text') this.drawTextContent(slide, ox, oy);
-        else this.drawImageContent(slide, ox, oy);
-      }
-
-      ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
 
       renderLoop() {
         this.ctx.clearRect(0, 0, this.res.w, this.res.h);
@@ -621,10 +531,20 @@
           const current = this.slides[this.playIndex];
           const next = this.slides[this.playIndex + 1];
           const dir = current.direction;
+          
+          // Fixed transition time (700ms), variable stay time
+          const stayTime = current.duration;
+          const transitionTime = 700;
+          const totalSlideTime = stayTime + transitionTime;
+          
+          const dt = 16.66; // approx 60fps ms
+          this.t += dt / totalSlideTime;
 
-          this.t += 0.008;
           let progress = 0;
-          if (this.t > 0.7) progress = this.ease((this.t - 0.7) / 0.3);
+          const stayPercent = stayTime / totalSlideTime;
+          if (this.t > stayPercent) {
+            progress = this.ease((this.t - stayPercent) / (1 - stayPercent));
+          }
 
           let ox = 0, oy = 0;
           if (dir === 'left') ox = -progress * this.res.w;
@@ -646,7 +566,11 @@
           if (this.t >= 1) {
             if (this.playIndex < this.slides.length - 1) {
               this.playIndex++; this.t = 0; this.updateSlideList();
-            } else { this.reset(); this.showToast("VIDEO FINISHED"); }
+            } else { 
+              if (this.recorder && this.recorder.state === "recording") this.recorder.stop();
+              this.reset(); 
+              this.showToast("VIDEO FINISHED"); 
+            }
           }
         }
         requestAnimationFrame(() => this.renderLoop());
