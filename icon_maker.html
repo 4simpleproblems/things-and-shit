@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Icon Generator | things and s***.</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f0f0f0; font-family: 'Nunito', sans-serif; padding-bottom: 120px; }
+
+    /* header */
+    .hero { padding: 60px 40px 20px; text-align: center; }
+    .hero h1 { 
+      font-family: 'Alfa Slab One', serif; 
+      font-size: clamp(35px, 7vw, 75px); 
+      color: #1a1a1a; 
+      line-height: 1.2;
+      letter-spacing: -3px;
+      display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap;
+    }
+    .title-badge {
+      display: inline-block; padding: 5px 20px; background: #ffffff; border: 5px solid #1a1a1a; border-radius: 15px;
+      transform: rotate(-4deg); cursor: default; box-shadow: 6px 6px 0px #e0e0e0;
+    }
+    .hero p { font-weight: 800; color: #999; margin-top: 15px; text-transform: uppercase; letter-spacing: 4px; font-size: 12px; }
+
+    /* layout */
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 350px 1fr; gap: 40px; }
+    @media (max-width: 992px) { .container { grid-template-columns: 1fr; } }
+
+    /* controls */
+    .controls-panel {
+      background: #ffffff; border: 5px solid #1a1a1a; border-radius: 30px; padding: 30px;
+      box-shadow: 10px 10px 0px #e0e0e0;
+      max-height: 800px; overflow-y: auto;
+    }
+    
+    .control-group { margin-bottom: 25px; }
+    .control-group label { display: block; font-weight: 900; margin-bottom: 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #333; }
+    
+    textarea, .select-box {
+      width: 100%; border: 4px solid #1a1a1a; border-radius: 15px; padding: 12px;
+      font-family: 'Alfa Slab One', serif; font-size: 16px; outline: none;
+      background: #f9f9f9; color: #1a1a1a;
+    }
+    textarea { resize: vertical; }
+    textarea:focus, .select-box:focus { background: #fff; box-shadow: 4px 4px 0px #e8e8e8; }
+    
+    .select-box { font-family: 'Nunito', sans-serif; font-weight: 800; cursor: pointer; }
+
+    .slider {
+      -webkit-appearance: none; width: 100%; height: 10px; border-radius: 5px;
+      background: #e8e8e8; outline: none; border: 2px solid #1a1a1a;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 25px; height: 25px; border-radius: 50%;
+      background: #FFB703; border: 4px solid #1a1a1a; cursor: pointer;
+    }
+
+    /* custom styling for background controls */
+    .bg-toolbar {
+      display: flex; gap: 15px; align-items: center; background: #f9f9f9; 
+      padding: 10px 15px; border: 4px solid #1a1a1a; border-radius: 15px;
+    }
+    .bg-toolbar label.toggle-label {
+      margin: 0; display: flex; align-items: center; gap: 8px; 
+      cursor: pointer; font-size: 13px; font-weight: 800; color: #1a1a1a;
+      text-transform: none; letter-spacing: 0;
+    }
+    .bg-toolbar input[type="checkbox"] {
+      width: 22px; height: 22px; cursor: pointer; accent-color: #FFB703;
+      border: 2px solid #1a1a1a;
+    }
+    .bg-toolbar input[type="color"] {
+      flex-grow: 1; height: 40px; border: 3px solid #1a1a1a; 
+      border-radius: 10px; cursor: pointer; padding: 0; background: #fff;
+    }
+    .bg-toolbar input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+    .bg-toolbar input[type="color"]::-webkit-color-swatch { border: 2px solid #1a1a1a; border-radius: 6px; }
+
+    .download-btn {
+      display: block; width: 100%; margin-top: 30px; padding: 18px;
+      background: #FFB703; color: #1a1a1a; border: 5px solid #1a1a1a; border-radius: 20px;
+      font-family: 'Alfa Slab One', serif; font-size: 20px; cursor: pointer;
+      box-shadow: 6px 6px 0px #1a1a1a; transition: all 0.2s ease;
+    }
+    .download-btn:hover { transform: translateY(4px); box-shadow: 2px 2px 0px #1a1a1a; background: #ffc436; }
+
+    /* specific banner control section styling */
+    #bannerOnlyControls { margin-top: 30px; padding-top: 25px; border-top: 4px dashed #ccc; }
+    #bannerOnlyControls h3 { font-family: 'Alfa Slab One', serif; margin-bottom: 20px; font-size: 22px; color: #1a1a1a; }
+
+    /* preview */
+    .preview-panel {
+      background: #f9f9f9; border: 5px solid #1a1a1a; border-radius: 30px;
+      display: flex; align-items: center; justify-content: center; padding: 40px;
+      box-shadow: 10px 10px 0px #e0e0e0;
+      background-image: 
+        linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%, #ddd),
+        linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 75%, #ddd 75%, #ddd);
+      background-size: 20px 20px; background-position: 0 0, 10px 10px;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%; height: auto; max-height: 750px; object-fit: contain;
+      border: 2px dashed #999; border-radius: 10px; background: transparent;
+    }
+
+    /* bottom navigation bar */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: #ffffff; border-top: 5px solid #1a1a1a;
+      display: flex; justify-content: center; gap: 20px; padding: 20px;
+      box-shadow: 0px -10px 20px rgba(0,0,0,0.05); z-index: 100;
+      flex-wrap: wrap;
+    }
+    .mode-btn {
+      padding: 12px 30px; background: #f9f9f9; color: #1a1a1a;
+      border: 4px solid #1a1a1a; border-radius: 15px; cursor: pointer;
+      font-family: 'Alfa Slab One', serif; font-size: 16px;
+      transition: all 0.2s ease; box-shadow: 4px 4px 0px #ccc;
+      text-align: center; line-height: 1.4;
+    }
+    .mode-btn span { display: block; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800; color: #666; }
+    .mode-btn:hover { transform: translateY(-2px); box-shadow: 6px 6px 0px #ccc; }
+    .mode-btn.active { background: #FFB703; box-shadow: 4px 4px 0px #1a1a1a; transform: translateY(-2px); }
+    .mode-btn.active span { color: #1a1a1a; }
+    
+    /* custom scrollbar */
+    .controls-panel::-webkit-scrollbar { width: 10px; }
+    .controls-panel::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .controls-panel::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; border: 2px solid #f1f1f1; }
+  </style>
+</head>
+<body id="mainBody">
+
+<div class="main-wrapper">
+  <div class="hero">
+    <h1>icon & banner <span class="title-badge">maker.</span></h1>
+    <p>things-and-shit.org</p>
+  </div>
+
+  <div class="container">
+    <div class="controls-panel">
+      <div class="control-group" id="bgControls" style="display: none;">
+        <label>Background Color</label>
+        <div class="bg-toolbar">
+          <label class="toggle-label">
+            <input type="checkbox" id="enableBg" checked>
+            Enable
+          </label>
+          <input type="color" id="bgColor" value="#ffb703">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Main Text</label>
+        <textarea id="textInput" rows="3">s
+***</textarea>
+      </div>
+
+      <div class="control-group">
+        <label>Main Text Alignment</label>
+        <select id="textAlign" class="select-box">
+          <option value="center">Center</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label>X Position</label>
+        <input type="range" id="xPos" class="slider" min="-1500" max="1500" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Y Position</label>
+        <input type="range" id="yPos" class="slider" min="-1500" max="1500" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>Merge Power (Gooeyness)</label>
+        <input type="range" id="gooey" class="slider" min="1" max="60" value="18">
+      </div>
+
+      <div class="control-group">
+        <label>Line Spacing</label>
+        <input type="range" id="lineSpacing" class="slider" min="50" max="150" value="85">
+      </div>
+
+      <div class="control-group">
+        <label>Border Roundness</label>
+        <input type="range" id="roundness" class="slider" min="0" max="100" value="20">
+      </div>
+
+      <div class="control-group">
+        <label>Border Thickness</label>
+        <input type="range" id="border" class="slider" min="0" max="60" value="12">
+      </div>
+
+      <div class="control-group">
+        <label>Main Font Size</label>
+        <input type="range" id="fontSize" class="slider" min="50" max="500" value="160">
+      </div>
+
+      <div class="control-group">
+        <label>Rotation (deg)</label>
+        <input type="range" id="rotation" class="slider" min="-45" max="45" value="-4">
+      </div>
+
+      <div class="control-group">
+        <label>Shadow Drop</label>
+        <input type="range" id="shadow" class="slider" min="0" max="100" value="25">
+      </div>
+
+      <div id="bannerOnlyControls" style="display: none;">
+        <h3>Banner URL Options</h3>
+        <div class="control-group">
+          <label>URL Text</label>
+          <textarea id="urlInput" rows="2">youtube.com/mychannel</textarea>
+        </div>
+        <div class="control-group">
+          <label>URL Alignment</label>
+          <select id="urlAlign" class="select-box">
+            <option value="center">Center</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>URL X Position</label>
+          <input type="range" id="urlX" class="slider" min="-1500" max="1500" value="0">
+        </div>
+        <div class="control-group">
+          <label>URL Y Position</label>
+          <input type="range" id="urlY" class="slider" min="-1500" max="1500" value="450">
+        </div>
+        <div class="control-group">
+          <label>URL Font Size</label>
+          <input type="range" id="urlSize" class="slider" min="20" max="300" value="70">
+        </div>
+        <div class="control-group">
+          <label>URL Line Spacing</label>
+          <input type="range" id="urlSpacing" class="slider" min="50" max="200" value="120">
+        </div>
+      </div>
+
+      <button class="download-btn" onclick="downloadIcon()">Download PNG</button>
+    </div>
+
+    <div class="preview-panel">
+      <canvas id="favCanvas" width="512" height="512"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button class="mode-btn active" data-mode="favicon" onclick="setMode('favicon')">Favicon<br><span>512 x 512</span></button>
+  <button class="mode-btn" data-mode="yt-icon" onclick="setMode('yt-icon')">YouTube Icon<br><span>800 x 800</span></button>
+  <button class="mode-btn" data-mode="yt-banner" onclick="setMode('yt-banner')">YouTube Banner<br><span>2560 x 1440</span></button>
+</div>
+
+<script>
+  const canvas = document.getElementById('favCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  // State Management
+  let currentMode = 'favicon';
+  const modes = {
+    'favicon': { w: 512, h: 512 },
+    'yt-icon': { w: 800, h: 800 },
+    'yt-banner': { w: 2560, h: 1440 }
+  };
+
+  function setMode(mode) {
+    currentMode = mode;
+    
+    // Update Active Buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+
+    // Toggle Background Tools (YT only)
+    document.getElementById('bgControls').style.display = (mode !== 'favicon') ? 'block' : 'none';
+
+    // Toggle Banner Specific Tools
+    document.getElementById('bannerOnlyControls').style.display = (mode === 'yt-banner') ? 'block' : 'none';
+
+    // Update Canvas True Resolution
+    canvas.width = modes[mode].w;
+    canvas.height = modes[mode].h;
+
+    drawIcon();
+  }
+
+  function applySoftThreshold(tCtx, w, h) {
+    const imgData = tCtx.getImageData(0, 0, w, h);
+    const data = imgData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      let a = data[i+3];
+      a = (a - 110) * 8; 
+      data[i+3] = Math.max(0, Math.min(255, a));
+    }
+    tCtx.putImageData(imgData, 0, 0);
+  }
+
+  function drawIcon() {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const lines = document.getElementById('textInput').value.split('\n');
+    const mainAlign = document.getElementById('textAlign').value;
+    const fontSize = parseInt(document.getElementById('fontSize').value);
+    const gooey = parseInt(document.getElementById('gooey').value);
+    const border = parseInt(document.getElementById('border').value);
+    const rot = parseInt(document.getElementById('rotation').value);
+    const shadowOffset = parseInt(document.getElementById('shadow').value);
+    const spacingRatio = parseInt(document.getElementById('lineSpacing').value) / 100;
+    
+    const xPos = parseInt(document.getElementById('xPos').value);
+    const yPos = parseInt(document.getElementById('yPos').value);
+    const roundness = parseInt(document.getElementById('roundness').value);
+
+    // Wipe Canvas
+    ctx.clearRect(0, 0, w, h);
+
+    // Apply Background Color (YT Modes only, if enabled)
+    if (currentMode !== 'favicon' && document.getElementById('enableBg').checked) {
+      ctx.fillStyle = document.getElementById('bgColor').value;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    const paddingX = fontSize * 0.4;
+    const paddingY = fontSize * 0.2;
+    const lineHeight = fontSize * spacingRatio;
+    const totalH = lines.length * lineHeight;
+    
+    // Base Anchor coordinates
+    const anchorX = (w / 2) + xPos;
+    const startY = ((h - totalH) / 2) + (lineHeight / 2) + yPos;
+
+    // ----- LAYER 1: Black Blob -----
+    const tmpLayer = document.createElement('canvas');
+    tmpLayer.width = w; tmpLayer.height = h;
+    const tCtx = tmpLayer.getContext('2d');
+    
+    tCtx.fillStyle = '#1a1a1a';
+    tCtx.filter = `blur(${gooey}px)`;
+
+    lines.forEach((line, i) => {
+      tCtx.font = `900 ${fontSize}px 'Alfa Slab One'`;
+      const textW = tCtx.measureText(line).width;
+      const rectW = textW + paddingX * 2 + border * 2;
+      const rectH = fontSize + paddingY * 2 + border * 2;
+      
+      let rectX;
+      if (mainAlign === 'center') rectX = anchorX - rectW/2;
+      else if (mainAlign === 'left') rectX = anchorX - paddingX - border;
+      else if (mainAlign === 'right') rectX = anchorX - textW - paddingX - border;
+
+      tCtx.beginPath();
+      tCtx.roundRect(rectX, startY + i * lineHeight - rectH/2, rectW, rectH, roundness + border);
+      tCtx.fill();
+    });
+
+    applySoftThreshold(tCtx, w, h);
+
+    // ----- LAYER 2: White Blob -----
+    const tmpLayerWhite = document.createElement('canvas');
+    tmpLayerWhite.width = w; tmpLayerWhite.height = h;
+    const tCtxW = tmpLayerWhite.getContext('2d');
+    
+    tCtxW.fillStyle = '#ffffff';
+    tCtxW.filter = `blur(${gooey}px)`;
+
+    lines.forEach((line, i) => {
+      tCtxW.font = `900 ${fontSize}px 'Alfa Slab One'`;
+      const textW = tCtxW.measureText(line).width;
+      const rectW = textW + paddingX * 2;
+      const rectH = fontSize + paddingY * 2;
+      
+      let rectX;
+      if (mainAlign === 'center') rectX = anchorX - rectW/2;
+      else if (mainAlign === 'left') rectX = anchorX - paddingX;
+      else if (mainAlign === 'right') rectX = anchorX - textW - paddingX;
+
+      tCtxW.beginPath();
+      tCtxW.roundRect(rectX, startY + i * lineHeight - rectH/2, rectW, rectH, roundness);
+      tCtxW.fill();
+    });
+
+    applySoftThreshold(tCtxW, w, h);
+
+    // ----- ASSEMBLE MAIN TEXT -----
+    ctx.save();
+    
+    // Rotate from center of the entire canvas + user offset
+    ctx.translate(anchorX, (h / 2) + yPos);
+    ctx.rotate(rot * Math.PI / 180);
+    ctx.translate(-anchorX, -((h / 2) + yPos));
+
+    // Shadow setup
+    if (shadowOffset > 0) {
+      ctx.shadowOffsetX = shadowOffset;
+      ctx.shadowOffsetY = shadowOffset;
+      ctx.shadowColor = 'rgba(0,0,0,0.2)'; // Changed to semi-transparent to look good against colors
+      ctx.shadowBlur = 0; 
+    }
+
+    ctx.drawImage(tmpLayer, 0, 0); // Black blob
+    ctx.shadowColor = 'transparent'; // Remove shadow for inner layer
+    ctx.drawImage(tmpLayerWhite, 0, 0); // White blob
+
+    // Draw Main Text
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = `900 ${fontSize}px 'Alfa Slab One'`;
+    ctx.textAlign = mainAlign;
+    ctx.textBaseline = 'middle';
+    
+    lines.forEach((line, i) => {
+      ctx.fillText(line, anchorX, startY + i * lineHeight - (fontSize * 0.05));
+    });
+
+    ctx.restore();
+
+    // ----- RENDER URL BANNER TEXT (IF APPLICABLE) -----
+    if (currentMode === 'yt-banner') {
+      const urlLines = document.getElementById('urlInput').value.split('\n');
+      const urlAlign = document.getElementById('urlAlign').value;
+      const urlX = parseInt(document.getElementById('urlX').value);
+      const urlY = parseInt(document.getElementById('urlY').value);
+      const urlSize = parseInt(document.getElementById('urlSize').value);
+      const urlSpacing = parseInt(document.getElementById('urlSpacing').value) / 100;
+      
+      const urlLineHeight = urlSize * urlSpacing;
+      const urlTotalH = urlLines.length * urlLineHeight;
+      const urlStartX = (w / 2) + urlX;
+      const urlStartY = ((h - urlTotalH) / 2) + (urlLineHeight / 2) + urlY;
+
+      ctx.save();
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `900 ${urlSize}px 'Nunito'`; 
+      ctx.textAlign = urlAlign;
+      ctx.textBaseline = 'middle';
+
+      // Slight white shadow to pop against dark colored backgrounds
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 0;
+
+      urlLines.forEach((line, i) => {
+        ctx.fillText(line, urlStartX, urlStartY + i * urlLineHeight);
+      });
+      ctx.restore();
+    }
+  }
+
+  function downloadIcon() {
+    const link = document.createElement('a');
+    link.download = `things-and-shit-${currentMode}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  // Auto-draw Event Listeners
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    el.addEventListener('input', drawIcon);
+    el.addEventListener('change', drawIcon); // Catch toggle and color changes instantly
+  });
+
+  // Initialize
+  document.fonts.ready.then(() => {
+    setMode('favicon'); 
+  });
+</script>
+
+</body>
+</html>
