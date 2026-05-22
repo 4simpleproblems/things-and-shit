@@ -338,6 +338,7 @@
   <div class="toast" id="studioToast">READY</div>
 
   <script>
+    class TASVideoStudio {
       constructor() {
         this.canvas = document.getElementById('previewCanvas');
         this.ctx = this.canvas.getContext('2d');
@@ -407,6 +408,47 @@
         });
       }
 
+      updateSlideList() {
+        const list = document.getElementById('slideList');
+        if (this.slides.length === 0) {
+          list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES</div>`;
+          return;
+        }
+        list.innerHTML = this.slides.map((s, i) => `
+          <div class="slide-item ${this.playIndex === i ? 'active' : ''}" 
+               draggable="true" 
+               ondragstart="studio.handleDragStart(event, ${i})"
+               ondragover="event.preventDefault()"
+               ondrop="studio.handleDrop(event, ${i})">
+            <div class="slide-index">${i + 1}</div>
+            <div class="slide-type-icon">
+              <i class="fa-solid ${s.type === 'image' ? 'fa-image' : 'fa-font'}"></i>
+            </div>
+            <div class="slide-controls">
+              <i class="fa-solid fa-pen-to-square action-icon edit" onclick="studio.openEdit(${i})"></i>
+              <i class="fa-solid fa-trash-can action-icon" onclick="studio.removeSlide(${i})"></i>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      handleDragStart(e, i) {
+        this.draggedItem = i;
+        e.target.classList.add('dragging');
+      }
+
+      handleDrop(e, i) {
+        e.preventDefault();
+        const item = this.slides.splice(this.draggedItem, 1)[0];
+        this.slides.splice(i, 0, item);
+        this.updateSlideList();
+      }
+
+      removeSlide(index) {
+        this.slides.splice(index, 1);
+        this.updateSlideList();
+      }
+
       openEdit(index) {
         const s = this.slides[index];
         this.editingIndex = index;
@@ -430,6 +472,14 @@
           document.getElementById('modalImgOverlayText').value = s.overlayText || '';
         }
       }
+
+      toggleModalFields() {
+        const layout = document.getElementById('modalLayout').value;
+        const fields = document.getElementById('alignableFields');
+        if (fields) fields.style.display = layout === 'intro-alignable' ? 'block' : 'none';
+      }
+
+      closeModal() { document.getElementById('editModal').classList.remove('active'); }
 
       saveEdit() {
         const s = this.slides[this.editingIndex];
@@ -514,6 +564,145 @@
         this.updateSlideList();
       }
 
+      reset() {
+        this.isAnimating = false;
+        this.playIndex = -1;
+        this.t = 0;
+        this.updateSlideList();
+      }
+
+      showToast(msg) {
+        const t = document.getElementById('studioToast');
+        t.innerText = msg.toUpperCase();
+        t.classList.add('active');
+        setTimeout(() => t.classList.remove('active'), 2500);
+      }
+
+      wrapText(text, maxWidth, baseSize) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+
+        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = this.ctx.measureText(currentLine + " " + word).width;
+          if (width < maxWidth) {
+            currentLine += " " + word;
+          } else {
+            lines.push(currentLine);
+            currentLine = word;
+          }
+        }
+        lines.push(currentLine);
+        return lines;
+      }
+
+      drawTextContent(slide, ox, oy) {
+        this.ctx.save();
+        this.ctx.translate(ox, oy);
+        this.ctx.fillStyle = '#1a1a1a';
+
+        if (slide.layout === 'center') {
+          let baseSize = 200;
+          const maxWidth = this.res.w * 0.8;
+          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          
+          if (lines.length > 4) {
+            baseSize = 120;
+            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          }
+          if (lines.length > 8) {
+            baseSize = 80;
+            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          }
+
+          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          
+          const totalH = lines.length * baseSize;
+          lines.forEach((line, i) => {
+            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
+            this.ctx.fillText(line, this.res.w / 2, y);
+          });
+        } else {
+          const titleSize = 100;
+          const descSize = 45;
+          const padding = 100;
+          const spacing = 30;
+          
+          this.ctx.textBaseline = 'top';
+          let tx, ty;
+          const al = slide.alignment;
+
+          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
+          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
+          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
+          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
+
+          this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 1.0;
+          this.ctx.fillText(slide.mainText, tx, ty);
+          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 0.5;
+          this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
+        }
+        this.ctx.restore();
+      }
+
+      drawImageContent(slide, ox, oy) {
+        const img = slide.img;
+        let dw, dh, dx, dy;
+        const mode = slide.fitting;
+
+        this.ctx.save();
+        this.ctx.translate(ox, oy);
+
+        if (mode === 'floating') {
+          const ratio = Math.min(this.res.w / img.width, this.res.h / img.height) * 0.8;
+          dw = img.width * ratio; dh = img.height * ratio;
+          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
+          if (slide.outline === 'on') {
+            this.ctx.fillStyle = '#1a1a1a';
+            this.ctx.fillRect(dx - 10, dy - 10, dw + 20, dh + 20);
+          }
+        } else if (mode === 'cover') {
+          const ratio = Math.max(this.res.w / img.width, this.res.h / img.height);
+          dw = img.width * ratio; dh = img.height * ratio;
+          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
+        } else if (mode === 'contain') {
+          const ratio = Math.min(this.res.w / img.width, this.res.h / img.height);
+          dw = img.width * ratio; dh = img.height * ratio;
+          dx = (this.res.w - dw) / 2; dy = (this.res.h - dh) / 2;
+        } else if (mode === 'stretch') {
+          dw = this.res.w; dh = this.res.h; dx = 0; dy = 0;
+        }
+
+        this.ctx.drawImage(img, dx, dy, dw, dh);
+
+        if (slide.overlayText) {
+          this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
+          this.ctx.fillRect(0, this.res.h - 150, this.res.w, 150);
+          this.ctx.fillStyle = '#fff';
+          this.ctx.font = "900 60px 'Alfa Slab One'";
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          this.ctx.fillText(slide.overlayText.toUpperCase(), this.res.w / 2, this.res.h - 75);
+        }
+        this.ctx.restore();
+      }
+
+      drawFrame(slide, ox, oy) {
+        this.ctx.fillStyle = '#FFB703';
+        this.ctx.fillRect(ox, oy, this.res.w, this.res.h);
+        if (slide.type === 'text') this.drawTextContent(slide, ox, oy);
+        else this.drawImageContent(slide, ox, oy);
+      }
+
+      ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
       renderLoop() {
         this.ctx.clearRect(0, 0, this.res.w, this.res.h);
 
@@ -532,12 +721,11 @@
           const next = this.slides[this.playIndex + 1];
           const dir = current.direction;
           
-          // Fixed transition time (700ms), variable stay time
           const stayTime = current.duration;
           const transitionTime = 700;
           const totalSlideTime = stayTime + transitionTime;
           
-          const dt = 16.66; // approx 60fps ms
+          const dt = 16.66; 
           this.t += dt / totalSlideTime;
 
           let progress = 0;
