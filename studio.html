@@ -479,25 +479,30 @@
         } else {
           // Intro, Alignable
           const titleSize = this.getDynamicFontSize(slide.mainText, 120, 40);
-          const descSize = titleSize * 0.5;
+          const descSize = titleSize * 0.45;
           const padding = 80;
+          const spacing = titleSize * 0.6; // Increased spacing between lines
           
           let tx, ty;
           const al = slide.alignment;
-          if (al === 'tl') { tx = padding; ty = padding + descSize; this.ctx.textAlign = 'left'; }
-          if (al === 'tr') { tx = this.res.w - padding; ty = padding + descSize; this.ctx.textAlign = 'right'; }
-          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize; this.ctx.textAlign = 'left'; }
-          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize; this.ctx.textAlign = 'right'; }
-
-          // Draw Desc (Top)
-          this.ctx.font = `900 ${descSize}px 'Nunito'`;
-          this.ctx.globalAlpha = 0.5;
-          this.ctx.fillText(slide.descText, tx, ty);
           
-          // Draw Title (Bottom)
+          // Use top baseline for easier vertical stacking
+          this.ctx.textBaseline = 'top';
+
+          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
+          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
+          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
+          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
+
+          // Draw Title (Top)
           this.ctx.globalAlpha = 1.0;
           this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
-          this.ctx.fillText(slide.mainText, tx, ty + titleSize * 0.8);
+          this.ctx.fillText(slide.mainText, tx, ty);
+          
+          // Draw Description (Bottom)
+          this.ctx.globalAlpha = 0.5;
+          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`; // Unified font
+          this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
         }
         this.ctx.restore();
       }
