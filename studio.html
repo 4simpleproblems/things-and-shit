@@ -151,21 +151,38 @@
       box-shadow: var(--shadow);
       position: relative;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       overflow: hidden;
     }
+    .canvas-container { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     canvas { width: 100%; height: 100%; object-fit: contain; }
 
-    .modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-      z-index: 3000; display: none; align-items: center; justify-content: center;
-      padding: 40px; backdrop-filter: blur(5px);
+    .playback-bar {
+      width: 100%;
+      background: var(--dark);
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      border-top: 5px solid var(--dark);
     }
-    .modal.active { display: flex; }
+    .scrubber-container { flex: 1; height: 10px; background: #333; border-radius: 5px; position: relative; cursor: pointer; }
+    .scrubber-progress { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); border-radius: 5px; width: 0%; }
+    .scrubber-handle { 
+      position: absolute; top: 50%; width: 20px; height: 20px; background: #fff; 
+      border: 3px solid var(--dark); border-radius: 50%; transform: translate(-50%, -50%); 
+    }
+    .playback-btn { 
+      background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; 
+      transition: 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .playback-btn:hover { color: var(--accent); transform: scale(1.1); }
+
     .modal-content {
       background: #fff; border: var(--border); border-radius: 30px;
-      width: 100%; max-width: 600px; padding: 40px; box-shadow: 20px 20px 0px var(--dark);
+      width: 100%; max-width: 650px; padding: 40px; box-shadow: 20px 20px 0px var(--dark);
       max-height: 90vh; overflow-y: auto;
     }
     .input-box {
@@ -219,36 +236,47 @@
       </div>
 
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <div class="grid-2">
-          <button class="btn-action btn-pink" onclick="studio.startSequence()">
-            <i class="fa-solid fa-play"></i> PLAY
-          </button>
-          <button class="btn-action btn-blue" onclick="studio.openExport()">
-            <i class="fa-solid fa-file-export"></i> EXPORT
-          </button>
-        </div>
-        <button class="btn-action btn-white" onclick="studio.reset()">
-          <i class="fa-solid fa-rotate-left"></i> RESET
+        <button class="btn-action btn-blue" onclick="studio.openExport()">
+          <i class="fa-solid fa-file-export"></i> PROJECT & EXPORT
         </button>
       </div>
     </div>
 
     <div class="preview">
-      <canvas id="previewCanvas"></canvas>
+      <div class="canvas-container">
+        <canvas id="previewCanvas"></canvas>
+      </div>
+      <div class="playback-bar">
+        <button class="playback-btn" onclick="studio.togglePlay()"><i class="fa-solid fa-play" id="playIcon"></i></button>
+        <button class="playback-btn" onclick="studio.reset()"><i class="fa-solid fa-rotate-left"></i></button>
+        <div class="scrubber-container" id="scrubberContainer">
+          <div class="scrubber-progress" id="scrubberProgress"></div>
+          <div class="scrubber-handle" id="scrubberHandle"></div>
+        </div>
+        <div id="timecodeDisplay" style="color:#fff; font-family:'Roboto Mono'; font-weight:900; font-size:12px; min-width:80px;">00:00</div>
+      </div>
     </div>
   </div>
 
   <!-- EXPORT MODAL -->
   <div class="modal" id="exportModal">
     <div class="modal-content">
-      <h2 style="font-family:'Alfa Slab One'; margin-bottom:20px; text-transform:uppercase;">Export & Save</h2>
+      <h2 style="font-family:'Alfa Slab One'; margin-bottom:20px; text-transform:uppercase;">Project & Export</h2>
       
       <div class="control-group">
-        <label>Project File</label>
+        <label>Save Project</label>
         <div class="grid-2">
           <button class="btn-action btn-white" onclick="studio.downloadProject()">.TAS-STUDIO</button>
           <button class="btn-action btn-white" onclick="studio.copyProject()">COPY JSON</button>
         </div>
+      </div>
+
+      <div class="control-group">
+        <label>Import Project</label>
+        <button class="btn-action btn-white" onclick="document.getElementById('importInput').click()">
+          <i class="fa-solid fa-file-import"></i> UPLOAD .TAS-STUDIO
+        </button>
+        <input type="file" id="importInput" accept=".tas-studio,application/json" onchange="studio.handleImport(event)">
       </div>
 
       <div class="control-group">
@@ -257,7 +285,6 @@
           <button class="btn-action btn-blue" onclick="studio.exportVideo('webm')">WEBM</button>
           <button class="btn-action btn-blue" onclick="studio.exportVideo('mp4')">MP4</button>
         </div>
-        <p style="font-size:10px; font-weight:800; color:#aaa; margin-top:10px; text-align:center;">Recording starts immediately upon selection.</p>
       </div>
 
       <button class="btn-action btn-white" onclick="studio.closeExport()">Close</button>
@@ -318,14 +345,40 @@
           <option value="stretch">Stretch (Squash to Fit)</option>
         </select>
 
-        <label>Outline</label>
+        <label>Outline (for Floating)</label>
         <select id="modalOutline" class="select-box">
           <option value="on">Enabled</option>
           <option value="off">Disabled</option>
         </select>
 
-        <label>Overlay Text (Optional)</label>
-        <textarea id="modalImgOverlayText" class="input-box" rows="2" placeholder="Text over image..."></textarea>
+        <label>Overlay Text</label>
+        <textarea id="modalImgOverlayText" class="input-box" rows="2" placeholder="Overlay text..."></textarea>
+        
+        <div class="grid-2">
+          <div>
+            <label>Text Color</label>
+            <input type="color" id="modalOverlayTextColor" class="input-box" value="#ffffff">
+          </div>
+          <div>
+            <label>BG Color</label>
+            <input type="color" id="modalOverlayBgColor" class="input-box" value="#000000">
+          </div>
+        </div>
+        
+        <div class="grid-2">
+          <div>
+            <label>Position</label>
+            <select id="modalOverlayPos" class="select-box">
+              <option value="bottom">Bottom</option>
+              <option value="top">Top</option>
+              <option value="middle">Middle</option>
+            </select>
+          </div>
+          <div>
+            <label>BG Opacity</label>
+            <input type="range" id="modalOverlayOpacity" class="slider" min="0" max="1" step="0.1" value="0.4">
+          </div>
+        </div>
       </div>
 
       <div class="grid-2">
@@ -345,8 +398,7 @@
         this.res = { w: 1920, h: 1080 };
         this.slides = []; 
         this.isAnimating = false;
-        this.playIndex = -1;
-        this.t = 0;
+        this.currentTime = 0; // Absolute time in ms
         this.editingIndex = -1;
         this.draggedItem = null;
         this.recorder = null;
@@ -358,14 +410,54 @@
       init() {
         this.canvas.width = this.res.w;
         this.canvas.height = this.res.h;
+        this.setupScrubber();
         this.renderLoop();
+      }
+
+      setupScrubber() {
+        const container = document.getElementById('scrubberContainer');
+        const handleScrub = (e) => {
+          const rect = container.getBoundingClientRect();
+          const x = (e.type === 'touchmove' || e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
+          const pos = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+          this.seekToPercent(pos);
+        };
+
+        container.addEventListener('mousedown', (e) => { this.isScrubbing = true; handleScrub(e); });
+        window.addEventListener('mousemove', (e) => { if (this.isScrubbing) handleScrub(e); });
+        window.addEventListener('mouseup', () => { this.isScrubbing = false; });
+      }
+
+      getTotalDuration() {
+        return this.slides.reduce((acc, s) => acc + s.duration + 700, 0);
+      }
+
+      seekToPercent(percent) {
+        const total = this.getTotalDuration();
+        this.currentTime = percent * total;
+        if (!this.isAnimating) this.drawAtTime(this.currentTime);
+      }
+
+      togglePlay() {
+        if (this.slides.length === 0) return;
+        this.isAnimating = !this.isAnimating;
+        document.getElementById('playIcon').className = this.isAnimating ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+        if (this.isAnimating && this.currentTime >= this.getTotalDuration()) this.currentTime = 0;
+      }
+
+      reset() {
+        this.isAnimating = false;
+        this.currentTime = 0;
+        document.getElementById('playIcon').className = 'fa-solid fa-play';
+        this.updateSlideList();
+        this.drawAtTime(0);
       }
 
       addNewSlide(type) {
         this.slides.push({
           type: type,
           direction: 'left',
-          duration: 3000, // 3 seconds default
+          duration: 3000,
           layout: 'center',
           alignment: 'tl',
           mainText: 'NEW SLIDE',
@@ -373,6 +465,10 @@
           fitting: 'floating',
           outline: 'on',
           overlayText: '',
+          overlayTextColor: '#ffffff',
+          overlayBgColor: '#000000',
+          overlayPos: 'bottom',
+          overlayOpacity: 0.4,
           img: null
         });
         this.updateSlideList();
@@ -388,24 +484,39 @@
             const img = new Image();
             img.onload = () => {
               this.slides.push({
-                type: 'image',
-                img: img,
-                direction: 'left',
-                duration: 3000,
-                fitting: 'floating',
-                outline: 'on',
-                overlayText: ''
+                type: 'image', img: img, direction: 'left', duration: 3000, fitting: 'floating', outline: 'on', 
+                overlayText: '', overlayTextColor: '#ffffff', overlayBgColor: '#000000', overlayPos: 'bottom', overlayOpacity: 0.4
               });
               loaded++;
-              if (loaded === files.length) {
-                this.updateSlideList();
-                this.showToast(`ADDED ${files.length} IMAGES`);
-              }
+              if (loaded === files.length) { this.updateSlideList(); this.showToast(`ADDED ${files.length} IMAGES`); }
             };
             img.src = event.target.result;
           };
           reader.readAsDataURL(file);
         });
+      }
+
+      handleImport(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const data = JSON.parse(event.target.result);
+            this.slides = data.map(s => {
+              if (s.type === 'image' && s.imgData) {
+                const img = new Image();
+                img.src = s.imgData;
+                s.img = img;
+              }
+              return s;
+            });
+            this.updateSlideList();
+            this.closeExport();
+            this.showToast("PROJECT IMPORTED");
+          } catch(e) { this.showToast("INVALID PROJECT FILE"); }
+        };
+        reader.readAsText(file);
       }
 
       updateSlideList() {
@@ -414,9 +525,20 @@
           list.innerHTML = `<div style="text-align:center; color:#aaa; font-size:11px; font-weight:900; padding:20px;">NO SLIDES</div>`;
           return;
         }
+        
+        // Find which slide index is currently active based on currentTime
+        let activeIdx = -1;
+        let elapsed = 0;
+        for(let i=0; i<this.slides.length; i++) {
+          const total = this.slides[i].duration + 700;
+          if (this.currentTime >= elapsed && this.currentTime < elapsed + total) { activeIdx = i; break; }
+          elapsed += total;
+        }
+
         list.innerHTML = this.slides.map((s, i) => `
-          <div class="slide-item ${this.playIndex === i ? 'active' : ''}" 
+          <div class="slide-item ${activeIdx === i ? 'active' : ''}" 
                draggable="true" 
+               onclick="studio.previewSlide(${i})"
                ondragstart="studio.handleDragStart(event, ${i})"
                ondragover="event.preventDefault()"
                ondrop="studio.handleDrop(event, ${i})">
@@ -425,28 +547,21 @@
               <i class="fa-solid ${s.type === 'image' ? 'fa-image' : 'fa-font'}"></i>
             </div>
             <div class="slide-controls">
-              <i class="fa-solid fa-pen-to-square action-icon edit" onclick="studio.openEdit(${i})"></i>
-              <i class="fa-solid fa-trash-can action-icon" onclick="studio.removeSlide(${i})"></i>
+              <i class="fa-solid fa-pen-to-square action-icon edit" onclick="event.stopPropagation(); studio.openEdit(${i})"></i>
+              <i class="fa-solid fa-trash-can action-icon" onclick="event.stopPropagation(); studio.removeSlide(${i})"></i>
             </div>
           </div>
         `).join('');
       }
 
-      handleDragStart(e, i) {
-        this.draggedItem = i;
-        e.target.classList.add('dragging');
-      }
-
-      handleDrop(e, i) {
-        e.preventDefault();
-        const item = this.slides.splice(this.draggedItem, 1)[0];
-        this.slides.splice(i, 0, item);
+      previewSlide(index) {
+        let elapsed = 0;
+        for(let i=0; i<index; i++) { elapsed += this.slides[i].duration + 700; }
+        this.currentTime = elapsed;
+        this.isAnimating = false;
+        document.getElementById('playIcon').className = 'fa-solid fa-play';
         this.updateSlideList();
-      }
-
-      removeSlide(index) {
-        this.slides.splice(index, 1);
-        this.updateSlideList();
+        this.drawAtTime(this.currentTime);
       }
 
       openEdit(index) {
@@ -470,16 +585,12 @@
           document.getElementById('modalFitting').value = s.fitting;
           document.getElementById('modalOutline').value = s.outline;
           document.getElementById('modalImgOverlayText').value = s.overlayText || '';
+          document.getElementById('modalOverlayTextColor').value = s.overlayTextColor || '#ffffff';
+          document.getElementById('modalOverlayBgColor').value = s.overlayBgColor || '#000000';
+          document.getElementById('modalOverlayPos').value = s.overlayPos || 'bottom';
+          document.getElementById('modalOverlayOpacity').value = s.overlayOpacity || 0.4;
         }
       }
-
-      toggleModalFields() {
-        const layout = document.getElementById('modalLayout').value;
-        const fields = document.getElementById('alignableFields');
-        if (fields) fields.style.display = layout === 'intro-alignable' ? 'block' : 'none';
-      }
-
-      closeModal() { document.getElementById('editModal').classList.remove('active'); }
 
       saveEdit() {
         const s = this.slides[this.editingIndex];
@@ -494,162 +605,14 @@
           s.fitting = document.getElementById('modalFitting').value;
           s.outline = document.getElementById('modalOutline').value;
           s.overlayText = document.getElementById('modalImgOverlayText').value;
+          s.overlayTextColor = document.getElementById('modalOverlayTextColor').value;
+          s.overlayBgColor = document.getElementById('modalOverlayBgColor').value;
+          s.overlayPos = document.getElementById('modalOverlayPos').value;
+          s.overlayOpacity = parseFloat(document.getElementById('modalOverlayOpacity').value);
         }
         this.updateSlideList();
+        this.drawAtTime(this.currentTime);
         this.closeModal();
-      }
-
-      openExport() { document.getElementById('exportModal').classList.add('active'); }
-      closeExport() { document.getElementById('exportModal').classList.remove('active'); }
-
-      copyProject() {
-        const data = JSON.stringify(this.slides.map(s => {
-          const {img, ...rest} = s;
-          if (s.type === 'image') rest.imgData = img.src;
-          return rest;
-        }));
-        navigator.clipboard.writeText(data);
-        this.showToast("JSON COPIED TO CLIPBOARD");
-      }
-
-      downloadProject() {
-        const data = JSON.stringify(this.slides.map(s => {
-          const {img, ...rest} = s;
-          if (s.type === 'image') rest.imgData = img.src;
-          return rest;
-        }));
-        const blob = new Blob([data], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "project.tas-studio";
-        a.click();
-        this.showToast("DOWNLOADED .TAS-STUDIO");
-      }
-
-      async exportVideo(type) {
-        this.closeExport();
-        this.showToast(`RECORDING ${type.toUpperCase()}...`);
-        
-        const stream = this.canvas.captureStream(60);
-        const mimeType = type === 'webm' ? 'video/webm;codecs=vp9' : 'video/mp4';
-        
-        try {
-          this.recordedChunks = [];
-          this.recorder = new MediaRecorder(stream, { mimeType });
-          this.recorder.ondataavailable = (e) => { if (e.data.size > 0) this.recordedChunks.push(e.data); };
-          this.recorder.onstop = () => {
-            const blob = new Blob(this.recordedChunks, { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `tas-video.${type}`;
-            a.click();
-            this.showToast("EXPORT COMPLETE");
-          };
-          
-          this.startSequence();
-          this.recorder.start();
-        } catch(e) {
-          this.showToast("FORMAT NOT SUPPORTED BY BROWSER");
-          console.error(e);
-        }
-      }
-
-      startSequence() {
-        if (this.slides.length === 0) return this.showToast("ADD SLIDES FIRST");
-        this.isAnimating = true;
-        this.playIndex = 0;
-        this.t = 0;
-        this.updateSlideList();
-      }
-
-      reset() {
-        this.isAnimating = false;
-        this.playIndex = -1;
-        this.t = 0;
-        this.updateSlideList();
-      }
-
-      showToast(msg) {
-        const t = document.getElementById('studioToast');
-        t.innerText = msg.toUpperCase();
-        t.classList.add('active');
-        setTimeout(() => t.classList.remove('active'), 2500);
-      }
-
-      wrapText(text, maxWidth, baseSize) {
-        const words = text.split(' ');
-        const lines = [];
-        let currentLine = words[0];
-
-        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
-
-        for (let i = 1; i < words.length; i++) {
-          const word = words[i];
-          const width = this.ctx.measureText(currentLine + " " + word).width;
-          if (width < maxWidth) {
-            currentLine += " " + word;
-          } else {
-            lines.push(currentLine);
-            currentLine = word;
-          }
-        }
-        lines.push(currentLine);
-        return lines;
-      }
-
-      drawTextContent(slide, ox, oy) {
-        this.ctx.save();
-        this.ctx.translate(ox, oy);
-        this.ctx.fillStyle = '#1a1a1a';
-
-        if (slide.layout === 'center') {
-          let baseSize = 200;
-          const maxWidth = this.res.w * 0.8;
-          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          
-          if (lines.length > 4) {
-            baseSize = 120;
-            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          }
-          if (lines.length > 8) {
-            baseSize = 80;
-            lines = this.wrapText(slide.mainText, maxWidth, baseSize);
-          }
-
-          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
-          this.ctx.textAlign = 'center';
-          this.ctx.textBaseline = 'middle';
-          
-          const totalH = lines.length * baseSize;
-          lines.forEach((line, i) => {
-            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
-            this.ctx.fillText(line, this.res.w / 2, y);
-          });
-        } else {
-          const titleSize = 100;
-          const descSize = 45;
-          const padding = 100;
-          const spacing = 30;
-          
-          this.ctx.textBaseline = 'top';
-          let tx, ty;
-          const al = slide.alignment;
-
-          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
-          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
-          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
-          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
-
-          this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
-          this.ctx.globalAlpha = 1.0;
-          this.ctx.fillText(slide.mainText, tx, ty);
-          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
-          this.ctx.globalAlpha = 0.5;
-          this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
-        }
-        this.ctx.restore();
       }
 
       drawImageContent(slide, ox, oy) {
@@ -683,85 +646,226 @@
         this.ctx.drawImage(img, dx, dy, dw, dh);
 
         if (slide.overlayText) {
-          this.ctx.fillStyle = 'rgba(0,0,0,0.4)';
-          this.ctx.fillRect(0, this.res.h - 150, this.res.w, 150);
-          this.ctx.fillStyle = '#fff';
+          const barH = 150;
+          let barY = this.res.h - barH;
+          if (slide.overlayPos === 'top') barY = 0;
+          if (slide.overlayPos === 'middle') barY = (this.res.h - barH) / 2;
+
+          this.ctx.globalAlpha = slide.overlayOpacity;
+          this.ctx.fillStyle = slide.overlayBgColor;
+          this.ctx.fillRect(0, barY, this.res.w, barH);
+          
+          this.ctx.globalAlpha = 1.0;
+          this.ctx.fillStyle = slide.overlayTextColor;
           this.ctx.font = "900 60px 'Alfa Slab One'";
           this.ctx.textAlign = 'center';
           this.ctx.textBaseline = 'middle';
-          this.ctx.fillText(slide.overlayText.toUpperCase(), this.res.w / 2, this.res.h - 75);
+          this.ctx.fillText(slide.overlayText.toUpperCase(), this.res.w / 2, barY + barH/2);
         }
         this.ctx.restore();
       }
 
+      drawAtTime(time) {
+        this.ctx.clearRect(0, 0, this.res.w, this.res.h);
+        if (this.slides.length === 0) return;
+
+        let elapsed = 0;
+        let found = false;
+
+        for(let i=0; i<this.slides.length; i++) {
+          const current = this.slides[i];
+          const next = this.slides[i+1];
+          const stayTime = current.duration;
+          const transTime = 700;
+          const total = stayTime + transTime;
+
+          if (time >= elapsed && time < elapsed + total) {
+            const slideT = (time - elapsed) / total;
+            const stayPercent = stayTime / total;
+            let progress = 0;
+            if (slideT > stayPercent) progress = this.ease((slideT - stayPercent) / (1 - stayPercent));
+
+            const dir = current.direction;
+            let ox = 0, oy = 0;
+            if (dir === 'left') ox = -progress * this.res.w;
+            else if (dir === 'right') ox = progress * this.res.w;
+            else if (dir === 'up') oy = -progress * this.res.h;
+            else if (dir === 'down') oy = progress * this.res.h;
+
+            this.drawFrame(current, ox, oy);
+
+            if (next && progress > 0) {
+              let nx = ox, ny = oy;
+              if (dir === 'left') nx += this.res.w;
+              else if (dir === 'right') nx -= this.res.w;
+              else if (dir === 'up') ny += this.res.h;
+              else if (dir === 'down') ny -= this.res.h;
+              this.drawFrame(next, nx, ny);
+            }
+            found = true;
+            break;
+          }
+          elapsed += total;
+        }
+
+        if (!found) this.drawFrame(this.slides[this.slides.length - 1], 0, 0);
+
+        // Update UI
+        const totalDur = this.getTotalDuration();
+        const percent = totalDur > 0 ? (time / totalDur) * 100 : 0;
+        document.getElementById('scrubberProgress').style.width = `${percent}%`;
+        document.getElementById('scrubberHandle').style.left = `${percent}%`;
+        
+        const pad = (n) => Math.floor(n).toString().padStart(2, '0');
+        const s = (time / 1000) % 60;
+        const m = (time / 60000) % 60;
+        document.getElementById('timecodeDisplay').innerText = `${pad(m)}:${pad(s)}`;
+      }
+
+      renderLoop() {
+        if (this.isAnimating && !this.isScrubbing) {
+          this.currentTime += 16.66;
+          if (this.currentTime >= this.getTotalDuration()) {
+            if (this.recorder && this.recorder.state === "recording") this.recorder.stop();
+            this.reset();
+            this.showToast("VIDEO FINISHED");
+          } else {
+            this.drawAtTime(this.currentTime);
+          }
+        } else if (!this.isAnimating) {
+           this.drawAtTime(this.currentTime);
+        }
+        requestAnimationFrame(() => this.renderLoop());
+      }
+      
+      // Inherit other methods...
+      toggleModalFields() {
+        const layout = document.getElementById('modalLayout').value;
+        const fields = document.getElementById('alignableFields');
+        if (fields) fields.style.display = layout === 'intro-alignable' ? 'block' : 'none';
+      }
+      closeModal() { document.getElementById('editModal').classList.remove('active'); }
+      openExport() { document.getElementById('exportModal').classList.add('active'); }
+      closeExport() { document.getElementById('exportModal').classList.remove('active'); }
+      showToast(msg) {
+        const t = document.getElementById('studioToast');
+        t.innerText = msg.toUpperCase();
+        t.classList.add('active');
+        setTimeout(() => t.classList.remove('active'), 2500);
+      }
+      ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+      handleDragStart(e, i) { this.draggedItem = i; e.target.classList.add('dragging'); }
+      handleDrop(e, i) {
+        e.preventDefault();
+        const item = this.slides.splice(this.draggedItem, 1)[0];
+        this.slides.splice(i, 0, item);
+        this.updateSlideList();
+      }
+      removeSlide(index) { this.slides.splice(index, 1); this.updateSlideList(); }
+      copyProject() {
+        const data = JSON.stringify(this.slides.map(s => {
+          const {img, ...rest} = s;
+          if (s.type === 'image') rest.imgData = img.src;
+          return rest;
+        }));
+        navigator.clipboard.writeText(data);
+        this.showToast("JSON COPIED");
+      }
+      downloadProject() {
+        const data = JSON.stringify(this.slides.map(s => {
+          const {img, ...rest} = s;
+          if (s.type === 'image') rest.imgData = img.src;
+          return rest;
+        }));
+        const blob = new Blob([data], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "project.tas-studio";
+        a.click();
+        this.showToast("DOWNLOADED .TAS-STUDIO");
+      }
+      async exportVideo(type) {
+        this.closeExport();
+        this.showToast(`RECORDING ${type.toUpperCase()}...`);
+        const stream = this.canvas.captureStream(60);
+        const mimeType = type === 'webm' ? 'video/webm;codecs=vp9' : 'video/mp4';
+        try {
+          this.recordedChunks = [];
+          this.recorder = new MediaRecorder(stream, { mimeType });
+          this.recorder.ondataavailable = (e) => { if (e.data.size > 0) this.recordedChunks.push(e.data); };
+          this.recorder.onstop = () => {
+            const blob = new Blob(this.recordedChunks, { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tas-video.${type}`;
+            a.click();
+            this.showToast("EXPORT COMPLETE");
+          };
+          this.currentTime = 0;
+          this.isAnimating = true;
+          this.recorder.start();
+        } catch(e) { this.showToast("FORMAT NOT SUPPORTED"); }
+      }
+      wrapText(text, maxWidth, baseSize) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+        this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = this.ctx.measureText(currentLine + " " + word).width;
+          if (width < maxWidth) currentLine += " " + word;
+          else { lines.push(currentLine); currentLine = word; }
+        }
+        lines.push(currentLine);
+        return lines;
+      }
+      drawTextContent(slide, ox, oy) {
+        this.ctx.save();
+        this.ctx.translate(ox, oy);
+        this.ctx.fillStyle = '#1a1a1a';
+        if (slide.layout === 'center') {
+          let baseSize = 200;
+          const maxWidth = this.res.w * 0.8;
+          let lines = this.wrapText(slide.mainText, maxWidth, baseSize);
+          if (lines.length > 4) { baseSize = 120; lines = this.wrapText(slide.mainText, maxWidth, baseSize); }
+          if (lines.length > 8) { baseSize = 80; lines = this.wrapText(slide.mainText, maxWidth, baseSize); }
+          this.ctx.font = `900 ${baseSize}px 'Alfa Slab One'`;
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          const totalH = lines.length * baseSize;
+          lines.forEach((line, i) => {
+            const y = (this.res.h / 2) - (totalH / 2) + (i * baseSize) + baseSize/2;
+            this.ctx.fillText(line, this.res.w / 2, y);
+          });
+        } else {
+          const titleSize = 100;
+          const descSize = 45;
+          const padding = 100;
+          const spacing = 30;
+          this.ctx.textBaseline = 'top';
+          let tx, ty;
+          const al = slide.alignment;
+          if (al === 'tl') { tx = padding; ty = padding; this.ctx.textAlign = 'left'; }
+          if (al === 'tr') { tx = this.res.w - padding; ty = padding; this.ctx.textAlign = 'right'; }
+          if (al === 'bl') { tx = padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'left'; }
+          if (al === 'br') { tx = this.res.w - padding; ty = this.res.h - padding - titleSize - descSize - spacing; this.ctx.textAlign = 'right'; }
+          this.ctx.font = `900 ${titleSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 1.0;
+          this.ctx.fillText(slide.mainText, tx, ty);
+          this.ctx.font = `900 ${descSize}px 'Alfa Slab One'`;
+          this.ctx.globalAlpha = 0.5;
+          this.ctx.fillText(slide.descText, tx, ty + titleSize + spacing);
+        }
+        this.ctx.restore();
+      }
       drawFrame(slide, ox, oy) {
         this.ctx.fillStyle = '#FFB703';
         this.ctx.fillRect(ox, oy, this.res.w, this.res.h);
         if (slide.type === 'text') this.drawTextContent(slide, ox, oy);
         else this.drawImageContent(slide, ox, oy);
-      }
-
-      ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
-
-      renderLoop() {
-        this.ctx.clearRect(0, 0, this.res.w, this.res.h);
-
-        if (!this.isAnimating) {
-          if (this.slides.length > 0) this.drawFrame(this.slides[0], 0, 0);
-          else {
-            this.ctx.fillStyle = '#FFB703';
-            this.ctx.fillRect(0, 0, this.res.w, this.res.h);
-            this.ctx.fillStyle = '#1a1a1a';
-            this.ctx.font = "900 100px 'Alfa Slab One'";
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText("READY TO CREATE", this.res.w/2, this.res.h/2);
-          }
-        } else {
-          const current = this.slides[this.playIndex];
-          const next = this.slides[this.playIndex + 1];
-          const dir = current.direction;
-          
-          const stayTime = current.duration;
-          const transitionTime = 700;
-          const totalSlideTime = stayTime + transitionTime;
-          
-          const dt = 16.66; 
-          this.t += dt / totalSlideTime;
-
-          let progress = 0;
-          const stayPercent = stayTime / totalSlideTime;
-          if (this.t > stayPercent) {
-            progress = this.ease((this.t - stayPercent) / (1 - stayPercent));
-          }
-
-          let ox = 0, oy = 0;
-          if (dir === 'left') ox = -progress * this.res.w;
-          else if (dir === 'right') ox = progress * this.res.w;
-          else if (dir === 'up') oy = -progress * this.res.h;
-          else if (dir === 'down') oy = progress * this.res.h;
-
-          this.drawFrame(current, ox, oy);
-
-          if (next && progress > 0) {
-            let nx = ox, ny = oy;
-            if (dir === 'left') nx += this.res.w;
-            else if (dir === 'right') nx -= this.res.w;
-            else if (dir === 'up') ny += this.res.h;
-            else if (dir === 'down') ny -= this.res.h;
-            this.drawFrame(next, nx, ny);
-          }
-
-          if (this.t >= 1) {
-            if (this.playIndex < this.slides.length - 1) {
-              this.playIndex++; this.t = 0; this.updateSlideList();
-            } else { 
-              if (this.recorder && this.recorder.state === "recording") this.recorder.stop();
-              this.reset(); 
-              this.showToast("VIDEO FINISHED"); 
-            }
-          }
-        }
-        requestAnimationFrame(() => this.renderLoop());
       }
     }
     window.studio = new TASVideoStudio();
