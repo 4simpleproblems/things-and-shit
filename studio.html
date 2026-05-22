@@ -358,13 +358,21 @@
           <label>Links / Socials (Alignable)</label>
           <textarea id="modalLinksText" class="input-box" rows="2" placeholder="youtube.com/4simpleproblems"></textarea>
           
-          <label>Links Alignment</label>
-          <select id="modalLinksAlign" class="select-box">
-            <option value="tl">Top Left</option>
-            <option value="tr">Top Right</option>
-            <option value="bl">Bottom Left</option>
-            <option value="br">Bottom Right</option>
-          </select>
+          <div class="grid-2">
+            <div>
+              <label>Links Alignment</label>
+              <select id="modalLinksAlign" class="select-box">
+                <option value="tl">Top Left</option>
+                <option value="tr">Top Right</option>
+                <option value="bl">Bottom Left</option>
+                <option value="br">Bottom Right</option>
+              </select>
+            </div>
+            <div>
+              <label>Link Color</label>
+              <input type="color" id="modalLinksColor" class="input-box" value="#ffffff" style="padding:5px; height:50px;">
+            </div>
+          </div>
 
           <div class="grid-2">
             <div>
@@ -497,7 +505,7 @@
 
       addNewSlide(type) {
         this.slides.push({
-          type: type, direction: 'left', duration: 3000, layout: 'center', alignment: 'tl', mainText: 'NEW SLIDE', descText: '', linksText: '', linksAlign: 'bl', bgColor: '#000000', yOffset: 0, badgeAngle: -4, badgeBorder: 5, badgeRound: 15, fitting: 'floating', outline: 'on', overlayText: '', overlayTextColor: '#ffffff', overlayBgColor: '#000000', overlayPos: 'bottom', overlayOpacity: 0.4, img: null
+          type: type, direction: 'left', duration: 3000, layout: 'center', alignment: 'tl', mainText: 'NEW SLIDE', descText: '', linksText: '', linksAlign: 'bl', linksColor: '#ffffff', bgColor: '#000000', yOffset: 0, badgeAngle: -4, badgeBorder: 5, badgeRound: 15, fitting: 'floating', outline: 'on', overlayText: '', overlayTextColor: '#ffffff', overlayBgColor: '#000000', overlayPos: 'bottom', overlayOpacity: 0.4, img: null
         });
         this.updateSlideList();
         this.openEdit(this.slides.length - 1);
@@ -590,6 +598,7 @@
           document.getElementById('modalDescText').value = s.descText;
           document.getElementById('modalLinksText').value = s.linksText || '';
           document.getElementById('modalLinksAlign').value = s.linksAlign || 'bl';
+          document.getElementById('modalLinksColor').value = s.linksColor || '#ffffff';
           document.getElementById('modalEndBgColor').value = s.bgColor || '#000000';
           document.getElementById('modalYOffset').value = s.yOffset || 0;
           document.getElementById('modalBadgeAngle').value = s.badgeAngle || -4;
@@ -620,6 +629,7 @@
           s.descText = document.getElementById('modalDescText').value;
           s.linksText = document.getElementById('modalLinksText').value;
           s.linksAlign = document.getElementById('modalLinksAlign').value;
+          s.linksColor = document.getElementById('modalLinksColor').value;
           s.bgColor = document.getElementById('modalEndBgColor').value;
           s.yOffset = parseFloat(document.getElementById('modalYOffset').value);
           s.badgeAngle = parseFloat(document.getElementById('modalBadgeAngle').value);
@@ -750,10 +760,10 @@
             this.ctx.save();
             this.ctx.shadowOffsetX = 3;
             this.ctx.shadowOffsetY = 3;
-            this.ctx.shadowColor = '#ffffff';
+            this.ctx.shadowColor = slide.linksColor === '#000000' ? '#ffffff' : 'rgba(0,0,0,0.5)'; // Dynamic contrast
             this.ctx.shadowBlur = 0;
-            this.ctx.fillStyle = '#1a1a1a';
-            this.ctx.globalAlpha = 0.8;
+            this.ctx.fillStyle = slide.linksColor || '#ffffff';
+            this.ctx.globalAlpha = 1.0; // Full opacity as requested
             lLines.forEach((line, i) => { this.ctx.fillText(line, lx, ly + (i * lSize * 1.2)); });
             this.ctx.restore();
           }
