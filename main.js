@@ -324,39 +324,66 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_12ymAaNfKTNDknIvcDVdEQ_l7P8jfdr';
     const customStorage = {
       getItem(key) {
+        try {
+          const localVal = window.localStorage.getItem(key);
+          if (localVal) return localVal;
+        } catch (e) {}
         const name = key + "=";
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
           let c = ca[i].trim();
           if (c.indexOf(name) === 0) {
             try {
-              return decodeURIComponent(c.substring(name.length));
-            } catch (e) {
-              return null;
-            }
+              const rawVal = decodeURIComponent(c.substring(name.length));
+              const parsed = JSON.parse(rawVal);
+              if (parsed.access_token) {
+                return JSON.stringify({
+                  access_token: parsed.access_token,
+                  refresh_token: parsed.refresh_token,
+                  expires_at: parsed.expires_at,
+                  token_type: "bearer",
+                  user: parsed.user || {}
+                });
+              }
+            } catch (e) {}
           }
         }
-        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+        return null;
       },
       setItem(key, value) {
-        const d = new Date();
-        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + d.toUTCString();
-        let domain = "";
-        if (window.location.hostname.endsWith("things-and-shit.org")) {
-          domain = ";domain=.things-and-shit.org";
-        }
-        const secureFlag = window.location.protocol === 'https:' ? ';Secure' : '';
-        document.cookie = key + "=" + encodeURIComponent(value) + ";" + expires + ";path=/" + domain + ";SameSite=Lax" + secureFlag;
-        try { window.localStorage.setItem(key, value); } catch (e) {}
+        try {
+          window.localStorage.setItem(key, value);
+        } catch (e) {}
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed.access_token) {
+            const compact = JSON.stringify({
+              access_token: parsed.access_token,
+              refresh_token: parsed.refresh_token,
+              expires_at: parsed.expires_at,
+              user: parsed.user ? { id: parsed.user.id, email: parsed.user.email } : {}
+            });
+            const d = new Date();
+            d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            let domain = "";
+            if (window.location.hostname.endsWith("things-and-shit.org")) {
+              domain = ";domain=.things-and-shit.org";
+            }
+            const secureFlag = window.location.protocol === 'https:' ? ';Secure' : '';
+            document.cookie = key + "=" + encodeURIComponent(compact) + ";" + expires + ";path=/" + domain + ";SameSite=Lax" + secureFlag;
+          }
+        } catch (e) {}
       },
       removeItem(key) {
+        try {
+          window.localStorage.removeItem(key);
+        } catch (e) {}
         let domain = "";
         if (window.location.hostname.endsWith("things-and-shit.org")) {
           domain = ";domain=.things-and-shit.org";
         }
         document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" + domain;
-        try { window.localStorage.removeItem(key); } catch (e) {}
       }
     };
 
