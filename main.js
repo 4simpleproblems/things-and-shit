@@ -1,4 +1,12 @@
 (function() {
+  if (window.location.hash.startsWith('##')) {
+    window.history.replaceState(
+      null,
+      document.title,
+      window.location.pathname + window.location.search + window.location.hash.substring(1)
+    );
+  }
+
   const sidebarHTML = `
     <nav id="sidebar">
       <div class="control-deck">
@@ -258,9 +266,10 @@
 
   window.loginGoogle = async function() {
     if (!window.supabase) return;
+    const cleanUrl = window.location.href.split('#')[0];
     await window.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href }
+      options: { redirectTo: cleanUrl }
     });
   };
 
@@ -268,9 +277,10 @@
     if (!window.supabase) return;
     const email = prompt("What's your email?");
     if (email) {
+      const cleanUrl = window.location.href.split('#')[0];
       const { error } = await window.supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: window.location.href }
+        options: { emailRedirectTo: cleanUrl }
       });
       if (error) {
         alert("Error: " + error.message);
