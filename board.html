@@ -249,13 +249,40 @@
     });
   }
   async function loadUserItems() {
-    return new Promise((resolve) => {
-      if(!db) resolve();
+    return new Promise(async (resolve) => {
+      if (window.supabase) {
+        const { data: { session } } = await window.supabase.auth.getSession();
+        if (session && session.user) {
+          const { data, error } = await window.supabase
+            .from('board_items')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data) {
+            userItems = data.map(item => ({
+              id: item.id,
+              category: item.category,
+              title: item.title,
+              shortDesc: item.short_desc,
+              fullDesc: item.full_desc,
+              date: item.log_date,
+              images: item.images,
+              tag: item.tag,
+              tagColor: item.tag_color
+            }));
+            resolve();
+            return;
+          }
+        }
+      }
+      if (!db) resolve();
       const tx = db.transaction('cache_store', 'readonly');
       const request = tx.objectStore('cache_store').getAll();
       request.onsuccess = () => { userItems = request.result.sort((a,b) => b.id - a.id); resolve(); };
     });
   }
+  window.addEventListener('supabaseAuthChange', () => {
+    loadUserItems().then(() => renderBoardGrid());
+  });
   initDB().then(() => loadUserItems()).then(() => renderBoardGrid());
 
   function getCardHTML(item) {
@@ -266,7 +293,7 @@
       : `<div class="slot-visual"><img src="${item.images[0]}"></div>`;
     return `
       <div class="card" onclick='openExpanded(this, ${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-        <div class="delete-item" onclick="event.stopPropagation(); deleteItem(${item.id})"><i class="fa-solid fa-xmark"></i></div>
+        <div class="delete-item" onclick="event.stopPropagation(); deleteItem('${item.id}')"><i class="fa-solid fa-xmark"></i></div>
         <div class="slot-design">
           ${visualHTML}
           <div class="slot-content">
@@ -332,18 +359,109 @@
   function updateCreateTagPreview() { const txt = document.getElementById('cTagInput').value, tagDisplay = document.getElementById('cTagDisplay'); if(txt.trim() === '') { hasCustomTag = false; tagDisplay.innerText = '+ add tag'; tagDisplay.className = 'tag tag-ghost create-modal-tag'; } else { hasCustomTag = true; tagDisplay.innerText = txt; tagDisplay.className = `tag tag-${currentCreateTagColor} create-modal-tag`; } }
   function applyCreateTagColor(colorName) { currentCreateTagColor = colorName; if(!hasCustomTag) { document.getElementById('cTagInput').value = 'Tag'; updateCreateTagPreview(); } else { document.getElementById('cTagDisplay').className = `tag tag-${colorName} create-modal-tag`; } }
   function removeCreateTag() { hasCustomTag = false; currentCreateTagColor = 'neutral'; document.getElementById('cTagInput').value = ''; const tagDisplay = document.getElementById('cTagDisplay'); tagDisplay.innerText = '+ add tag'; tagDisplay.className = 'tag tag-ghost create-modal-tag'; toggleTagEditor(); }
-  function saveToBoard() {
-    const cat = document.getElementById('cCatSelect').value; if (cat === 'thing' && createImages.length === 0) { showToast("A 'thing' requires a photo.", "error"); return; }
-    const titleText = document.getElementById('cTitleEdit').innerText.trim(), shortText = document.getElementById('cShortEdit').innerText.trim(), fullText = document.getElementById('cFullEdit').innerText.trim(), tagText = document.getElementById('cTagInput').value.trim();
-    let dateText = "Unknown Date"; const dateVal = document.getElementById('cDateEdit').value;
-    if(dateVal) { const d = new Date(dateVal + 'T00:00:00'), months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], day = d.getDate(), ordinal = (day > 3 && day < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10]; dateText = `${months[d.getMonth()]} ${day}${ordinal}, ${d.getFullYear()}`; }
-    const newItem = { id: Date.now(), category: cat, title: titleText || 'Untitled', shortDesc: shortText || 'No description.', fullDesc: fullText || 'No story provided.', date: dateText, images: (cat === 's***') ? ['texture'] : [...createImages] };
-    if(hasCustomTag && tagText) { newItem.tag = tagText; newItem.tagColor = currentCreateTagColor; }
-    const tx = db.transaction('cache_store', 'readwrite'); tx.objectStore('cache_store').add(newItem);
-    tx.oncomplete = () => { userItems.unshift(newItem); closeCreateModal(); renderBoardGrid(); showToast("Saved to cache.", "success"); };
+  async function saveToBoard() {
+    const cat = document.getElementById('cCatSelect').value;
+    if (cat === 'thing' && createImages.length === 0) {
+      showToast("A 'thing' requires a photo.", "error");
+      return;
+    }
+    const titleText = document.getElementById('cTitleEdit').innerText.trim();
+    const shortText = document.getElementById('cShortEdit').innerText.trim();
+    const fullText = document.getElementById('cFullEdit').innerText.trim();
+    const tagText = document.getElementById('cTagInput').value.trim();
+    let dateText = "Unknown Date";
+    const dateVal = document.getElementById('cDateEdit').value;
+    if (dateVal) {
+      const d = new Date(dateVal + 'T00:00:00');
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const day = d.getDate();
+      const ordinal = (day > 3 && day < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
+      dateText = `${months[d.getMonth()]} ${day}${ordinal}, ${d.getFullYear()}`;
+    }
+    const newItem = {
+      category: cat,
+      title: titleText || 'Untitled',
+      shortDesc: shortText || 'No description.',
+      fullDesc: fullText || 'No story provided.',
+      date: dateText,
+      images: (cat === 's***') ? ['texture'] : [...createImages]
+    };
+    if (hasCustomTag && tagText) {
+      newItem.tag = tagText;
+      newItem.tagColor = currentCreateTagColor;
+    }
+
+    let isCloud = false;
+    if (window.supabase) {
+      const { data: { session } } = await window.supabase.auth.getSession();
+      if (session && session.user) {
+        const { data, error } = await window.supabase.from('board_items').insert([{
+          user_id: session.user.id,
+          category: newItem.category,
+          title: newItem.title,
+          short_desc: newItem.shortDesc,
+          full_desc: newItem.fullDesc,
+          log_date: newItem.date,
+          images: newItem.images,
+          tag: newItem.tag || null,
+          tag_color: newItem.tagColor || null
+        }]).select().single();
+        if (error) {
+          showToast("Cloud save error: " + error.message, "error");
+          return;
+        }
+        newItem.id = data.id;
+        isCloud = true;
+      }
+    }
+
+    if (!isCloud) {
+      newItem.id = Date.now();
+      const tx = db.transaction('cache_store', 'readwrite');
+      tx.objectStore('cache_store').add(newItem);
+      tx.oncomplete = () => {
+        userItems.unshift(newItem);
+        closeCreateModal();
+        renderBoardGrid();
+        showToast("Saved to cache.", "success");
+      };
+    } else {
+      userItems.unshift(newItem);
+      closeCreateModal();
+      renderBoardGrid();
+      showToast("Saved to cloud.", "success");
+    }
   }
   const toBase64 = file => new Promise((resolve) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); });
-  function deleteItem(id) { const tx = db.transaction('cache_store', 'readwrite'); tx.objectStore('cache_store').delete(id); tx.oncomplete = () => { userItems = userItems.filter(i => i.id !== id); renderBoardGrid(); showToast("Destroyed.", "success"); }; }
+  async function deleteItem(id) {
+    let isCloud = false;
+    if (window.supabase) {
+      const { data: { session } } = await window.supabase.auth.getSession();
+      if (session && session.user && typeof id === 'string' && id.includes('-')) {
+        const { error } = await window.supabase.from('board_items').delete().eq('id', id);
+        if (error) {
+          showToast("Cloud delete error: " + error.message, "error");
+          return;
+        }
+        isCloud = true;
+      }
+    }
+
+    if (!isCloud) {
+      const numericId = Number(id);
+      const tx = db.transaction('cache_store', 'readwrite');
+      tx.objectStore('cache_store').delete(isNaN(numericId) ? id : numericId);
+      tx.oncomplete = () => {
+        userItems = userItems.filter(i => String(i.id) !== String(id));
+        renderBoardGrid();
+        showToast("Destroyed.", "success");
+      };
+    } else {
+      userItems = userItems.filter(i => String(i.id) !== String(id));
+      renderBoardGrid();
+      showToast("Destroyed from cloud.", "success");
+    }
+  }
 
   let originCard = null, viewSlideIndex = 0;
   function openExpanded(card, item) {

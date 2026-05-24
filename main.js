@@ -31,6 +31,7 @@
         <div class="nav-blob"></div>
         <div class="nav-link"><i class="fa-solid fa-briefcase"></i> <span>Creations and s***</span></div>
       </a>
+      <div class="sidebar-auth" id="sidebarAuth"></div>
     </nav>
   `;
 
@@ -141,6 +142,40 @@
       .nav-hitbox { margin-bottom: 0; }
       .nav-link span { display: none; }
     }
+
+    .sidebar-auth {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 5px solid #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .auth-user-info {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      text-align: center;
+      word-break: break-all;
+    }
+    @media (max-width: 1000px) {
+      .sidebar-auth {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+      }
+      .auth-user-info {
+        display: none;
+      }
+      .auth-trigger span, .auth-logout span {
+        display: none;
+      }
+    }
   `;
   document.head.appendChild(style);
 
@@ -175,4 +210,160 @@
       icon.className = sb.classList.contains('collapsed') ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
     }
   };
+
+  const authModalHTML = `
+    <div id="authModalDimmer" onclick="closeAuthModal()" style="position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); opacity: 0; pointer-events: none; z-index: 19998; transition: opacity 0.5s ease;"></div>
+    <div id="authModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: calc(100vw - 40px); max-width: 400px; background: #ffffff; border: 5px solid #1a1a1a; border-radius: 40px; box-shadow: 15px 15px 0px #1a1a1a; padding: 40px; z-index: 19999; display: none; opacity: 0; transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1); flex-direction: column; gap: 20px;">
+      <div style="position: absolute; top: 15px; right: 15px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" onclick="closeAuthModal()">
+        <div style="background: #ffffff; border: 4px solid #1a1a1a; border-radius: 10px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <h2 style="font-family: 'Alfa Slab One', serif; font-size: 28px; line-height: 1.1; margin-bottom: 5px; color: #1a1a1a;">Sign In</h2>
+      <p style="font-size: 14px; font-weight: 700; color: #666; margin-bottom: 10px; line-height: 1.4;">Access your board and synced services across all domains.</p>
+      <button onclick="loginGoogle()" style="width: 100%; padding: 15px; background: #ffffff; color: #1a1a1a; border: 4px solid #1a1a1a; border-radius: 15px; font-family: 'Alfa Slab One', serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 4px 4px 0px #1a1a1a; transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='6px 6px 0px #1a1a1a';" onmouseout="this.style.transform='none'; this.style.boxShadow='4px 4px 0px #1a1a1a';">
+        <i class="fa-brands fa-google"></i> Continue with Google
+      </button>
+      <button onclick="loginEmailPrompt()" style="width: 100%; padding: 15px; background: #1a1a1a; color: #ffffff; border: 4px solid #1a1a1a; border-radius: 15px; font-family: 'Alfa Slab One', serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 4px 4px 0px #cccccc; transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='6px 6px 0px #cccccc';" onmouseout="this.style.transform='none'; this.style.boxShadow='4px 4px 0px #cccccc';">
+        <i class="fa-solid fa-envelope"></i> Continue with Email
+      </button>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', authModalHTML);
+
+  window.openAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    const dimmer = document.getElementById('authModalDimmer');
+    modal.style.display = 'flex';
+    void modal.offsetWidth;
+    requestAnimationFrame(() => {
+      dimmer.style.opacity = '1';
+      dimmer.style.pointerEvents = 'auto';
+      modal.style.opacity = '1';
+      modal.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    const dimmer = document.getElementById('authModalDimmer');
+    dimmer.style.opacity = '0';
+    dimmer.style.pointerEvents = 'none';
+    modal.style.opacity = '0';
+    modal.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    setTimeout(() => {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }, 400);
+  };
+
+  window.loginGoogle = async function() {
+    if (!window.supabase) return;
+    await window.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.href }
+    });
+  };
+
+  window.loginEmailPrompt = async function() {
+    if (!window.supabase) return;
+    const email = prompt("What's your email?");
+    if (email) {
+      const { error } = await window.supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.href }
+      });
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("Magic link sent! Check your inbox.");
+      }
+    }
+  };
+
+  window.logoutSupabase = async function() {
+    if (!window.supabase) return;
+    await window.supabase.auth.signOut();
+    window.location.reload();
+  };
+
+  function updateAuthUI(session) {
+    const container = document.getElementById('sidebarAuth');
+    if (!container) return;
+    if (session && session.user) {
+      container.innerHTML = `
+        <div class="auth-user-info">
+          <span>${session.user.email}</span>
+        </div>
+        <div class="nav-hitbox auth-logout" onclick="logoutSupabase()">
+          <div class="nav-blob" style="border-color: #FF0054;"></div>
+          <div class="nav-link" style="color: #FF0054;"><i class="fa-solid fa-right-from-bracket"></i> <span>Sign Out</span></div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="nav-hitbox auth-trigger" onclick="openAuthModal()">
+          <div class="nav-blob"></div>
+          <div class="nav-link"><i class="fa-solid fa-key"></i> <span>Sync Board</span></div>
+        </div>
+      `;
+    }
+  }
+
+  function initSupabase() {
+    const SUPABASE_URL = 'https://epnjfsfveqbvoimpstbd.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_12ymAaNfKTNDknIvcDVdEQ_l7P8jfdr';
+    const customStorage = {
+      getItem(key) {
+        const name = key + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) === ' ') c = c.substring(1);
+          if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+        }
+        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+      },
+      setItem(key, value) {
+        const d = new Date();
+        d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + d.toUTCString();
+        let domain = "";
+        if (window.location.hostname.endsWith("things-and-shit.org")) {
+          domain = ";domain=.things-and-shit.org";
+        }
+        document.cookie = key + "=" + value + ";" + expires + ";path=/" + domain + ";SameSite=Lax;Secure";
+        try { window.localStorage.setItem(key, value); } catch (e) {}
+      },
+      removeItem(key) {
+        let domain = "";
+        if (window.location.hostname.endsWith("things-and-shit.org")) {
+          domain = ";domain=.things-and-shit.org";
+        }
+        document.cookie = key + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/" + domain;
+        try { window.localStorage.removeItem(key); } catch (e) {}
+      }
+    };
+
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        storage: customStorage,
+        autoRefreshToken: true,
+        persistSession: true
+      }
+    });
+
+    window.supabase.auth.onAuthStateChange((event, session) => {
+      updateAuthUI(session);
+      const authEvent = new CustomEvent('supabaseAuthChange', { detail: { session } });
+      window.dispatchEvent(authEvent);
+    });
+  }
+
+  const supabaseScript = document.createElement('script');
+  supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  supabaseScript.onload = () => {
+    initSupabase();
+  };
+  document.head.appendChild(supabaseScript);
 })();
