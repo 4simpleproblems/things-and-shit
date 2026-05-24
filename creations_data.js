@@ -34,5 +34,11 @@ window.creationsData = [
     "image": "images/creations/september-11.png",
     "url": "https://september-11th-memorial.vercel.app/memorial.html",
     "description": "Three.js deep dive into history."
+  },
+  {
+    "title": "Day One",
+    "image": "images/creations/day-one.png",
+    "url": "https://day-one.things-and-shit.org/",
+    "description": "Daily workout, state, and weight tracker."
   }
 ];
