@@ -315,12 +315,16 @@
     const customStorage = {
       getItem(key) {
         const name = key + "=";
-        const decodedCookie = decodeURIComponent(document.cookie);
-        const ca = decodedCookie.split(';');
+        const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
-          let c = ca[i];
-          while (c.charAt(0) === ' ') c = c.substring(1);
-          if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+          let c = ca[i].trim();
+          if (c.indexOf(name) === 0) {
+            try {
+              return decodeURIComponent(c.substring(name.length));
+            } catch (e) {
+              return null;
+            }
+          }
         }
         try { return window.localStorage.getItem(key); } catch (e) { return null; }
       },
@@ -332,7 +336,8 @@
         if (window.location.hostname.endsWith("things-and-shit.org")) {
           domain = ";domain=.things-and-shit.org";
         }
-        document.cookie = key + "=" + value + ";" + expires + ";path=/" + domain + ";SameSite=Lax;Secure";
+        const secureFlag = window.location.protocol === 'https:' ? ';Secure' : '';
+        document.cookie = key + "=" + encodeURIComponent(value) + ";" + expires + ";path=/" + domain + ";SameSite=Lax" + secureFlag;
         try { window.localStorage.setItem(key, value); } catch (e) {}
       },
       removeItem(key) {
