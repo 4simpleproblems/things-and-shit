@@ -40,5 +40,11 @@ window.creationsData = [
     "image": "images/creations/day-one.png",
     "url": "https://day-one.things-and-shit.org/",
     "description": "Daily workout, state, and weight tracker."
+  },
+  {
+    "title": "Velium",
+    "image": "images/creations/velium.png",
+    "url": "https://velium.things-and-shit.org/",
+    "description": "Web music player, no ads."
   }
 ];
