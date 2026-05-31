@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+    <script>
+        (function() {
+            function isTrusted(urlStr) {
+                try {
+                    const url = new URL(urlStr);
+                    const host = url.hostname;
+                    return host === 'localhost' ||
+                           host === '127.0.0.1' ||
+                           host.endsWith('geopolitics-game.org') ||
+                           host.endsWith('things-and-shit.org');
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const fromUrl = params.get('from');
+            if (fromUrl && isTrusted(fromUrl)) {
+                window.location.replace(fromUrl.split('#')[0] + window.location.hash);
+            } else {
+                window.location.replace('/index.html' + window.location.hash);
+            }
+        })();
+    </script>
+</body>
+</html>
+<!-- Made with ❤️ from 4SP -->
